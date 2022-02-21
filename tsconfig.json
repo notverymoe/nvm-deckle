@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "module": "ES6",
+        "strict": true,
+        "removeComments": true,
+        "sourceMap": true,
+        "incremental": true,
+        "jsx": "react",
+        "jsxFactory": "Preact.createElement",
+        "jsxFragmentFactory": "Preact.Fragment",
+        "moduleResolution": "node",
+        "baseUrl": "./",
+        "paths": {
+          "*":         ["src/*"],
+          "react":     ["node_modules/preact/compat"],
+          "react-dom": ["node_modules/preact/compat"]
+        }
+    },
+    "include": ["src/**/*"],
+    "exclude": ["node_modules"],
+}
