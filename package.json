@@ -20,6 +20,7 @@
     "webpack-cli": "^4.9.2"
   },
   "dependencies": {
+    "@react-hook/resize-observer": "^1.2.5",
     "@tauri-apps/api": "^1.0.0-rc.1",
     "preact": "^10.6.6"
   }

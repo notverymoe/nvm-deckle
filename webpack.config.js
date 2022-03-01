@@ -34,8 +34,9 @@ module.exports = {
                 ],
             },
             {
-                test: /\.(png|jpe?g|gif|webp|svg)$/i,
+                test: /\.(png|jpe?g|gif|webp|svg|json)$/i,
                 loader: 'file-loader',
+                type: 'javascript/auto',
                 options: {
                     name: '[name].[contenthash].[ext]'
                 }
@@ -49,8 +50,10 @@ module.exports = {
             "react-dom":            "preact/compat",     // Must be below test-utils
             "react/jsx-runtime":    "preact/jsx-runtime"
         },
+        extensions: [".tsx", ".ts", ".jsx", ".js"],
         modules: [
             "node_modules",
+            path.resolve(__dirname, "./src/script/"),
             path.resolve(__dirname, "./src/")
         ]
     },
@@ -60,6 +63,6 @@ module.exports = {
         }),
         new MiniCssExtractPlugin({
             filename: '[name].[contenthash].css'
-        })
+        }),
     ]
 };
