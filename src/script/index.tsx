@@ -4,38 +4,32 @@ import "style/main.scss";
 //import cat_img from "asset/cat.gif";
 
 import * as Preact from "preact";
-import { loadAtomicCards, loadSetLists } from "api";
-import { CardAtomicFile, SetListFile } from "mtgjson/files";
-import { VirtualList } from "components/virtual_list";
+import { ButtonGroup, ButtonIcon, ButtonText } from "components/button";
 
+import Icon from "assets/icon.svg";
+import { ScrollBar } from "components/scrollbar";
+import { useState } from "preact/hooks";
 
 (async function() {
-    const [cards, sets] = await Promise.all([loadAtomicCards(), loadSetLists()]);
-
-    console.log(Object.keys(cards.data).length);
-    console.log(sets.data.length);
-
     Preact.render(
-        <RenderPage cards={cards} sets={sets}/>,
+        <RenderPage/>,
         document.body
     );
 
 })();
 
+function RenderPage() {
 
+    const [offset, setOffset] = useState(0);
 
-
-function RenderPage({cards, sets}: {cards: CardAtomicFile, sets: SetListFile}) {
     return <>
         <h1>Cards</h1>
-        <VirtualList
-            class="card-list"
-            length={Object.keys(cards.data).length}
-            lines_per_entry={1}
-            render={(idx) => <>{Object.keys(cards.data)[idx]}</>}
-        />
-        <h1>Sets</h1>
-        <ol>{sets.data.map(({name}) => <li key={name}>{name}</li>)}</ol>
-        {/*<img src={cat_img}/>*/}
+        <p>hello</p>
+        <ButtonGroup direction="vertical">
+            <ButtonText content="Hey how are you" action={() => console.log("a")}/>
+            <ButtonText content="Yolo lol"        action={() => console.log("b")}/>
+            <ButtonText content="Hello"           action={() => console.log("c")}/>
+        </ButtonGroup>
+        <ScrollBar direction="vertical" value={offset} setValue={setOffset} step={0.1}/>
     </>;
 }

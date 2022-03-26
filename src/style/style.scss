@@ -1,0 +1,24 @@
+
+
+@mixin button-theme() {
+    user-select: none;
+    cursor: pointer;
+
+    background-color: var(--bg-input-3);
+    color: var(--fg-input-3);
+
+    &:hover {
+        background-color: var(--bg-input-2);
+        color: var(--fg-input-2);
+    }
+
+    &:active {
+        background-color: var(--bg-input-1);
+        color: var(--fg-input-1);
+    }
+
+    &:focus { 
+        outline: none; 
+        box-shadow: inset 0 0 0 1px var(--accent-1);
+    }
+}

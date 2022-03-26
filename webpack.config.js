@@ -7,8 +7,11 @@ module.exports = {
     devtool: 'inline-source-map',
     output: {
         clean: true,
-        filename: '[name].[contenthash].js',
+        filename: '[name].js',
         path: path.resolve(__dirname, './dist')
+    },
+    devServer: {
+      static: './dist',
     },
     module: {
         rules: [
@@ -38,7 +41,7 @@ module.exports = {
                 loader: 'file-loader',
                 type: 'javascript/auto',
                 options: {
-                    name: '[name].[contenthash].[ext]'
+                    name: '[name].[ext]'
                 }
             }
         ],
@@ -62,7 +65,7 @@ module.exports = {
             title: 'Temporary Title'
         }),
         new MiniCssExtractPlugin({
-            filename: '[name].[contenthash].css'
+            filename: '[name].css'
         }),
     ]
 };

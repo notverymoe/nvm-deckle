@@ -1,0 +1,89 @@
+
+@import "style/style.scss";
+
+
+$border-radius: 0.25rem;
+
+button.button {
+    appearance: none;
+    -webkit-appearance: none;
+
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0.25em;
+    min-height: 1em;
+    min-width:  1em;
+    line-height: 1;
+
+    border: none;
+    border-radius: $border-radius;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: 1rem;
+
+    transition: 0.2s background-color ease-in-out;
+
+    @include button-theme;
+
+    &.icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        > * { 
+            width: 100%; 
+            height: 100%; 
+            * { fill: var(--fg-panel-1); }
+        }
+
+        max-width: 2em;
+        max-height: 2em;
+    }
+}
+
+div.button-group {
+    display: flex;
+    flex-wrap: nowrap;
+    
+    height: max-content;
+    width: max-content;
+    
+
+    > .button-spacer {
+        z-index: 1;
+        flex: 0 0;
+        background-color: var(--bg-input-3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        > .button-spacer-inner {
+            background-color: var(--fg-input-0);
+        }
+    }
+    
+    &.vertical {
+        flex-direction: column;
+        :first-child { border-radius: $border-radius $border-radius 0              0;       }
+        :last-child  { border-radius: 0              0              $border-radius $border-radius; }
+
+        > .button-spacer > .button-spacer-inner {
+            height: 1px;
+            width:  75%;
+        }
+    }
+
+    &.horizontal {
+        flex-direction: row;
+        :first-child { border-radius: $border-radius 0              0              $border-radius; }
+        :last-child  { border-radius: 0              $border-radius $border-radius 0;              }
+
+        > .button-spacer > .button-spacer-inner {
+            height: 75%;
+            width:  1px;
+        }
+    }
+
+    :not(:first-child):not(:last-child) {
+        border-radius: 0;
+    }
+}

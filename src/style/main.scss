@@ -1,10 +1,58 @@
+@use "sass:color";
 
-$text-color: red;
+$base-03: #002b36;
+$base-02: #073642;
+$base-01: #586e75;
+$base-00: #657b83;
 
-h1 {
-    color: $text-color;
+$base-0: #839496;
+$base-1: #93a1a1;
+$base-2: #eee8d5;
+$base-3: #fdf6e3;
+
+$input-03: color.adjust($base-00, $lightness: 45%);
+$input-02: color.adjust($base-00, $lightness: 30%);
+$input-01: color.adjust($base-00, $lightness: 15%);
+$input-00: $base-00;
+
+$accent-0:#268bd2;
+$accent-1: color.adjust($accent-0, $whiteness: 15%);
+$accent-2: color.adjust($accent-0, $whiteness: 30%);
+$accent-3: color.adjust($accent-0, $whiteness: 45%);
+
+$input-03: color.adjust($accent-0, $blackness: 25%);
+$input-02: color.adjust($accent-0, $blackness: 35%);
+$input-01: color.adjust($accent-0, $blackness: 40%);
+$input-00: color.adjust($accent-0, $blackness: 45%);
+
+html {
+    --bg-panel-3: #{$base-03};
+    --bg-panel-2: #{$base-02};
+    --bg-panel-1: #{$base-01};
+    --bg-panel-0: #{$base-00};
+
+    --fg-panel-3: #{$base-0};
+    --fg-panel-2: #{$base-1};
+    --fg-panel-1: #{$base-2};
+    --fg-panel-0: #{$base-3};
+
+    --accent-0: #{$accent-0};
+    --accent-1: #{$accent-1};
+    --accent-2: #{$accent-2};
+    --accent-3: #{$accent-3};
+
+    --bg-input-3: #{$input-03};
+    --bg-input-2: #{$input-02};
+    --bg-input-1: #{$input-01};
+    --bg-input-0: #{$input-00};
+
+    --fg-input-3: #{$base-3};
+    --fg-input-2: #{$base-2};
+    --fg-input-1: #{$base-1};
+    --fg-input-0: #{$base-0};
 }
 
-.card-list {
-    height: 480px;
+body {
+    background-color: var(--bg-panel-3);
+    color:            var(--fg-panel-3 );
 }
