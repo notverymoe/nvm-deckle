@@ -3,68 +3,22 @@ import "./button.scss";
 import * as Preact from "preact";
 import { joinClassNames } from "util/shared";
 import { useInterval, useMemoAsync } from "./hooks";
-import { useRef } from "preact/hooks";
+import { useCallback, useRef } from "preact/hooks";
+import { registerOneShotDocumentEvent } from "./util";
+
+const imgCache = new Map<string, string>();
 
 export interface ButtonProps {
     ["class"]?: string,
     action?: () => void,
-    repeat?: () => void,
-    content: string,
+    icon?: string,
+    text?: string,
     title?: string,
     rate?: number,
-}
-
-export function ButtonText(props: ButtonProps) {
-    return <ButtonInternal kind="text" {...props}/>;
-}
-
-export function ButtonIcon(props: ButtonProps) {
-    return <ButtonInternal kind="icon" {...props}/>;
-}
-
-
-function ButtonInternal({kind, content, title, action, repeat, rate, ["class"]: className}: ButtonProps & {kind: "text" | "icon"}) {
-    const repeatRef = useRef(repeat);
-    repeatRef.current = repeat;
-    const [,img,] = useMemoAsync(() => {
-        if (kind !== "icon") return Promise.resolve("");
-        return fetch(content).then(v => v.text());
-    }, [kind, content]);
-
-    const repeatSources = useRef(0);
-
-    useInterval(() => {
-        if (repeatSources.current === 0) return;
-        repeat?.();
-    }, rate ?? 20);
-
-    return <button 
-        class={joinClassNames("button text", className)}
-        onMouseDown={e => {
-            e.preventDefault();
-            const cb = () => {
-                document.removeEventListener("mouseup", cb);
-                repeatSources.current -= 1;
-            };
-            document.addEventListener("mouseup", cb);
-            repeatSources.current += 1;
-        }}
-        onKeyDown={e => {
-            if (e.code !== "Space") return;
-            e.preventDefault();
-            const cb = () => {
-                if (e.code !== "Space") return;
-                document.removeEventListener("keyup", cb);
-                repeatSources.current -= 1;
-            };
-            document.addEventListener("keyup", cb);
-            repeatSources.current += 1;
-        }}
-        onClick={action && (e => { if (e.button == 0) { action();} })}
-        onSubmit={action}
-        title={title}
-        dangerouslySetInnerHTML={kind === "icon" ? {__html: img ?? ""} : undefined}
-    >{kind === "text" ? content : undefined}</button>;
+    noCache?: boolean,
+    noRepeat?: boolean,
+    iconRotate?: number,
+    refElem?: (v: HTMLButtonElement | null) => void,
 }
 
 export function ButtonGroup({["class"]: className, direction, children}: {
@@ -75,6 +29,61 @@ export function ButtonGroup({["class"]: className, direction, children}: {
     return <div 
         class={joinClassNames(`button-group ${direction}`, className)}
     >{children?.flatMap(v => [v, <ButtonSpacer/>]).splice(0, children?.length*2-1)}</div>;
+}
+
+export function Button({icon, text, title, action, rate, ["class"]: className, noCache, noRepeat, refElem, iconRotate}: ButtonProps) {
+    const [,img,] = useMemoAsync(async () => {
+        if (!icon) return "";
+        if (!noCache) {
+            const existing = imgCache.get(icon);
+            if (existing) return existing;
+        }
+
+        const result = await (await fetch(icon)).text();
+        if (!noCache) imgCache.set(icon, result);
+        return result;
+    }, [icon]);
+
+    const repeatSources = useRef(0);
+    useInterval(() => {
+        if (noRepeat || repeatSources.current === 0) return;
+        action?.();
+    }, rate ?? 20);
+
+    return <button 
+        class={joinClassNames("button", className)}
+        onMouseDown={e => {
+            if (noRepeat || e.button !== 0) return;
+            repeatSources.current += 1;
+            registerOneShotDocumentEvent("mouseup", e => {
+                if (e.button !== 0) return;
+                repeatSources.current -= 1;
+            });
+        }}
+        onKeyDown={e => {
+            if ((noRepeat && e.repeat) || e.key !== " ") return;
+            action?.();
+        }}
+        onClick={e => {
+            if (e.button !== 0) return;
+            action?.();
+        }}
+        onSelect={e => {
+            e.preventDefault();
+        }}
+        onSubmit={action}
+        title={title}
+        ref={refElem}
+    >
+        {img && <div 
+            class="button-icon"
+            style={iconRotate ? {transform: `rotate(${iconRotate*90}deg)`} : undefined}
+            dangerouslySetInnerHTML={{__html: img}}
+        />}
+        {text && <div
+            class="button-text"
+        >{text}</div>}
+    </button>;
 }
 
 function ButtonSpacer() {

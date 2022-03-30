@@ -4,13 +4,20 @@
 
 $border-radius: 0.25rem;
 
-button.button {
+.button {
+    user-select: none;
+    * {  user-select: none; }
+
     appearance: none;
     -webkit-appearance: none;
 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     box-sizing: border-box;
     margin: 0;
-    padding: 0.25em;
+    padding: 0;
     min-height: 1em;
     min-width:  1em;
     line-height: 1;
@@ -20,24 +27,31 @@ button.button {
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
-    font-size: 1rem;
+    font-size: inherit;
 
     transition: 0.2s background-color ease-in-out;
 
     @include button-theme;
 
-    &.icon {
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    .button-icon {
+        box-sizing: border-box;
+        margin: 2px;
+
+        width: 2em;
+        height: 2em;
+        max-width: 2em;
+        max-height: 2em;
+
         > * { 
             width: 100%; 
             height: 100%; 
-            * { fill: var(--fg-panel-1); }
+            * { fill: var(--fg-panel-1); stroke: var(--fg-panel-1); }
         }
+    }
 
-        max-width: 2em;
-        max-height: 2em;
+    .button-text {
+        box-sizing: border-box;
+        margin: 0.25em;
     }
 }
 
