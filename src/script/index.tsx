@@ -4,33 +4,41 @@ import "style/main.scss";
 //import cat_img from "asset/cat.gif";
 
 import * as Preact from "preact";
-import { ButtonGroup, Button } from "components/button";
 
-import Icon from "assets/icon.svg";
-import { ScrollBar } from "components/scrollbar";
 import { useState } from "preact/hooks";
+import { VList } from "components/vlist";
+import { useMemoAsync, useRangeVirtual } from "components/hooks";
+import { loadAtomicCards } from "api";
 
 (async function() {
     Preact.render(
         <RenderPage/>,
         document.body
     );
-
 })();
 
 function RenderPage() {
-
-    const [offset, setOffset] = useState(0);
+    const [loaded, cards] = useMemoAsync(loadAtomicCards);
 
     return <>
         <h1>Cards</h1>
-        <p>hello</p>
-        <ButtonGroup direction="vertical">
-            <Button text="Hey how are you" action={() => console.log("a")}/>
-            <Button text="Yolo lol"        action={() => console.log("b")}/>
-            <Button text="Hello"           action={() => console.log("c")}/>
-        </ButtonGroup>
-        <ScrollBar direction="vertical"   value={offset} setValue={setOffset} step={0.1}/>
-        <ScrollBar direction="horizontal" value={offset} setValue={setOffset} step={0.1}/>
+        {!loaded && <>Loading...</>}
+        {cards && <CardList cardNames={Object.keys(cards.data)}/>}
     </>;
+}
+
+function CardList({cardNames}: {cardNames: string[]}) {
+
+    const [[idx, len], setRange] = useState<[number, number]>([0,0]);
+
+    const content = useRangeVirtual((i, len) => {
+        const length = Math.max(Math.min(cardNames.length-i, len), 0);
+        return Array.from({length}, (_, j) => <div key={i+j}>{i+j} - {cardNames[i+j]}</div>);
+    }, idx, len, cardNames.length ?? 0);
+
+    return <VList 
+        lines={1}
+        setRange={setRange} 
+        length={cardNames.length}
+    >{content}</VList>
 }

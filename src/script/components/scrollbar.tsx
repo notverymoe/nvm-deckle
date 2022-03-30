@@ -6,13 +6,16 @@ import { useRef } from "preact/hooks";
 
 import IconArrow from "assets/icons/arrow.svg";
 import IconMenu  from "assets/icons/menu.svg";
+import { joinClassNames } from "util/shared";
 
-export function ScrollBar({direction, value, setValue, step, panRate}: {
+export function ScrollBar({direction, value, setValue, step, panRate, scrollRate, ["class"]: className}: {
     direction: "vertical" | "horizontal",
     value: number,
     setValue: (v: number) => void,
     step: number,
-    panRate?: number
+    panRate?: number,
+    scrollRate?: number,
+    ["class"]?: string,
 }) {
     const offset   = clamp(value)*100;
     const refUp    = useRef<HTMLButtonElement | null>(null);
@@ -20,8 +23,9 @@ export function ScrollBar({direction, value, setValue, step, panRate}: {
     const refSlide = useRef<HTMLButtonElement | null>(null);
 
     return <div 
-        class={`scrollbar ${direction}`} 
+        class={joinClassNames(`scrollbar`, direction, className)} 
         style={{"--scrollbar-offset": `${offset}%`}}
+        onWheel={e => setValue(clamp(value + (scrollRate ?? 1)*step*Math.sign(e.deltaY)))}
         onKeyDown={(e: KeyboardEvent) => {
             switch(e.key) {
                 case "ArrowUp": {

@@ -17,7 +17,7 @@ export function useMemoAsync<T>(callback: () => Promise<T>, deps?: any[]): [bool
             if (req != reqCount.current) return;
             setResult([true, undefined, e]);
         });
-    }, deps);
+    }, deps ?? []);
 
     
     return result;
@@ -80,7 +80,7 @@ export function useRangeVirtual<T>(
 }
 
 function areDepsDifferent(a: any[], b: any[]): boolean {
-    return a.length != b.length || a.findIndex((v,i) => v !== b[i]) < 0;
+    return a.length != b.length || a.findIndex((v,i) => v !== b[i]) >= 0;
 }
 
 export function useInterval(callback: () => void | Promise<void>, rate: number) {
