@@ -2,7 +2,7 @@ import useResizeObserver from "@react-hook/resize-observer";
 import * as React from "preact/compat";
 import * as Preact from "preact/hooks";
 import { Disposable } from "util/disposable";
-import { WatchValue } from "util/watch_value";
+import { ReadonlyWatchValue, WatchValue } from "util/watch_value";
 
 export function useMemoAsync<T>(callback: () => Promise<T>, deps?: any[]): [boolean, T | undefined, Error | undefined] {
     const reqCount = Preact.useRef(0);
@@ -25,23 +25,30 @@ export function useMemoAsync<T>(callback: () => Promise<T>, deps?: any[]): [bool
 
 export function useMemoWithDispose<T extends Disposable>(callback: () => T, deps?: any[]) {
     const value = Preact.useMemo(callback, deps);
-    Preact.useEffect(() => { return () => value.dispose(); }, deps);;
+    Preact.useEffect(() => { return () => value.dispose(); }, [value]);
     return value;
 }
 
-export function useCallbackWrapped<T extends Function>(callback: T) {
+export function useCallbackWrapped<T extends Function>(callback: T): T {
     const ref = Preact.useRef(callback);
     ref.current = callback;
-    const wrapped = Preact.useRef((...v: any[]) => ref.current(...v));
-    return wrapped.current as unknown as T;
+    const wrapped = Preact.useCallback((...v: any[]) => ref.current(...v), []);
+    return wrapped as unknown as T;
 }
 
-export function useWatchValue<T>(container: WatchValue<T>) {
+export function useWatchValue<T>(container: WatchValue<T>): [T, (v: T) => void] {
     const [,setCount] = Preact.useState(0);
     const countRef = Preact.useRef(0);
-    useMemoWithDispose(() => container.watch(() => setCount(countRef.current++)), [container]);
+    useMemoWithDispose(() => container.watch(() => setCount(++countRef.current), true), [container]);
     const setWrapped = useCallbackWrapped((v: T) => { container.value = v; });
     return [container.value, setWrapped]
+}
+
+export function useWatchValueReadonly<T>(container: ReadonlyWatchValue<T>) {
+    const [,setCount] = Preact.useState(0);
+    const countRef = Preact.useRef(0);
+    useMemoWithDispose(() => container.watch(() => setCount(++countRef.current), true), [container]);
+    return container.value;
 }
 
 export function useLast<T>(value: T, initial: T) {

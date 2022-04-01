@@ -8,16 +8,21 @@ import IconArrow from "assets/icons/arrow.svg";
 import IconMenu  from "assets/icons/menu.svg";
 import { joinClassNames } from "util/shared";
 
-export function ScrollBar({direction, value, setValue, step, panRate, scrollRate, ["class"]: className}: {
+export function ScrollBar({direction, value, setValue, valueMax, step, panRate, scrollRate, ["class"]: className}: {
     direction: "vertical" | "horizontal",
     value: number,
     setValue: (v: number) => void,
     step: number,
+    valueMax?: number,
     panRate?: number,
     scrollRate?: number,
     ["class"]?: string,
 }) {
-    const offset   = clamp(value)*100;
+    function clamp(v: number): number {
+        return Math.min(Math.max(v, 0), valueMax ?? 1);
+    }
+
+    const offset   = clamp(value)/(valueMax ?? 1)*100;
     const refUp    = useRef<HTMLButtonElement | null>(null);
     const refDown  = useRef<HTMLButtonElement | null>(null);
     const refSlide = useRef<HTMLButtonElement | null>(null);
@@ -73,7 +78,7 @@ export function ScrollBar({direction, value, setValue, step, panRate, scrollRate
                         const point  = direction === "vertical" ? ev.pageY         : ev.pageX;
                         const origin = resolveOffsets(target)[direction === "vertical" ? 1 : 0];
                         const length = direction === "vertical" ? rect.height      : rect.width;
-                        setValue(clamp(Math.max(point - origin, 0.0)/length));
+                        setValue(clamp(Math.max(point - origin, 0.0)/length * (valueMax ?? 1)));
                     }
 
                     const cb = (e: MouseEvent) => {
@@ -102,10 +107,6 @@ export function ScrollBar({direction, value, setValue, step, panRate, scrollRate
             />
         </div>
     </div>;
-}
-
-function clamp(v: number): number {
-    return Math.min(Math.max(v, 0), 1);
 }
 
 function resolveOffsets(element: HTMLElement | Element | null) {

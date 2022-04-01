@@ -1,5 +1,5 @@
 
-
+@use "sass:math";
 @import "style/style.scss";
 
 $scrollbar-size: 1em;
@@ -60,11 +60,11 @@ $scrollbar-size: 1em;
 
             > .button {
                 &:first-child {
-                    margin-bottom: $scrollbar-size/2;
+                    margin-bottom: math.div($scrollbar-size, 2);
                     border-radius: 0.25em 0.25em 0 0;
                 }
                 &:last-child {
-                    margin-top: $scrollbar-size/2;
+                    margin-top: math.div($scrollbar-size, 2);
                     border-radius: 0 0 0.25em 0.25em;
                 }
             }
@@ -89,11 +89,11 @@ $scrollbar-size: 1em;
 
             > .button {
                 &:first-child {
-                    margin-right: $scrollbar-size/2;
+                    margin-right: math.div($scrollbar-size, 2);
                     border-radius: 0.25em 0 0 0.25em;
                 }
                 &:last-child {
-                    margin-left: $scrollbar-size/2;
+                    margin-left: math.div($scrollbar-size, 2);
                     border-radius: 0 0.25em 0.25em 0;
                 }
             }

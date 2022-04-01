@@ -1,0 +1,21 @@
+
+
+.list-cards {
+    
+    &.focused .card-entry {
+        background-color: grey;
+
+        &.selected {
+            background-color: pink;
+        }
+    }
+
+    &.unfocused .card-entry {
+        background-color: darkblue;
+
+        &.selected {
+            background-color: darkred;
+        }
+    }
+
+}

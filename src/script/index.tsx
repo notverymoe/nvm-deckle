@@ -5,10 +5,10 @@ import "style/main.scss";
 
 import * as Preact from "preact";
 
-import { useState } from "preact/hooks";
-import { VList } from "components/vlist";
-import { useMemoAsync, useRangeVirtual } from "components/hooks";
+import { useMemoAsync    } from "components/hooks";
 import { loadAtomicCards } from "api";
+import { ListCards       } from "deckyard/components/ListCards";
+import { useState } from "preact/hooks";
 
 (async function() {
     Preact.render(
@@ -18,27 +18,13 @@ import { loadAtomicCards } from "api";
 })();
 
 function RenderPage() {
-    const [loaded, cards] = useMemoAsync(loadAtomicCards);
+    const [loaded, db] = useMemoAsync(loadAtomicCards);
+
+    const [selected, setSelected] = useState(0);
 
     return <>
         <h1>Cards</h1>
         {!loaded && <>Loading...</>}
-        {cards && <CardList cardNames={Object.keys(cards.data)}/>}
+        {db && <ListCards selected={selected} setSelected={setSelected} cards={db.cards}/>}
     </>;
-}
-
-function CardList({cardNames}: {cardNames: string[]}) {
-
-    const [[idx, len], setRange] = useState<[number, number]>([0,0]);
-
-    const content = useRangeVirtual((i, len) => {
-        const length = Math.max(Math.min(cardNames.length-i, len), 0);
-        return Array.from({length}, (_, j) => <div key={i+j}>{i+j} - {cardNames[i+j]}</div>);
-    }, idx, len, cardNames.length ?? 0);
-
-    return <VList 
-        lines={1}
-        setRange={setRange} 
-        length={cardNames.length}
-    >{content}</VList>
 }

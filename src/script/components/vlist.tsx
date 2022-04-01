@@ -1,52 +1,59 @@
 import "./vlist.scss";
 
 import * as Preact from "preact";
-import { useLayoutEffect, useMemo, useState } from "preact/hooks";
+import { useCallback, useEffect, useState } from "preact/hooks";
 import { ScrollBar } from "./scrollbar";
-import { useRangeVirtual } from "./hooks";
+import { joinClassNames } from "util/shared";
 
-
-export function VList({lines: linesRaw, setRange, length, children}: {
-    setRange: (v: [number, number]) => void,
-    lines?: number,
+export function VList({length, offset, setOffset, setCount, setCountVis, setOffsetMax, lines: linesRaw, children, ["class"]: className, events, refElem, tabIndex}: {
     length: number,
+    offset: number,
+    setOffset:     (v: number) => void,
+    setCount:      (v: number) => void,
+    setCountVis?:  (v: number) => void,
+    setOffsetMax?: (v: number) => void,
+    lines?: number,
+    ["class"]?: string,
     children?: Preact.VNode[],
+    events?: Partial<Preact.JSX.DOMAttributes<HTMLDivElement>>,
+    refElem?: (v: HTMLDivElement | null) => void,
+    tabIndex?: number,
 }) {
     const lines = linesRaw ?? 1;
-    const [scrollPosition, setScrollPosition] = useState(0);
-    const [refContent, setRefContent] = useState<HTMLDivElement | null>(null);
+    const [refContent,     setRefContent    ] = useState<HTMLDivElement | null>(null);
     const [refContentSize, setRefContentSize] = useState<HTMLDivElement | null>(null);
 
-    const offset = Math.min(Math.floor(scrollPosition * length), length - 1);
-    const count  = (refContent && refContentSize && Math.ceil(refContent.clientHeight/refContentSize.offsetHeight)) || 0;
-    const step   = 1/length;
+    const countRaw  = refContent && refContentSize && (refContent.clientHeight/refContentSize.offsetHeight) || 1;
+    const countDisp = Math.ceil(countRaw);
+    const countReal = Math.floor(countRaw);
+    const offsetMax = length - countReal;
 
-    useLayoutEffect(() => setRange([offset, count]), [offset, count])
+    useEffect(() => {
+        setCount(countDisp);
+        setCountVis?.(countReal);
+        setOffsetMax?.(offsetMax);
+    }, [countReal, countDisp, offsetMax]);
 
-    return <div class="vlist">
+    return <div {...events} class={joinClassNames("vlist", className)} ref={refElem}>
         <div
             class="vlist-content" 
             ref={setRefContent} 
             style={{"--entry-height": `${refContentSize?.clientHeight ?? 0}px`}}
-            onWheel={e => setScrollPosition(clamp(scrollPosition + step*Math.sign(e.deltaY)))}
+            onWheel={e => setOffset(offset + Math.sign(e.deltaY))}
+            tabIndex={tabIndex}
         >
             <div 
                 class="vlist-content-scaler"
                 ref={setRefContentSize}
-            >
-                {Array.from({length: lines}, () => ".").join("\n")}
-            </div>
+            >{Array.from({length: lines}, () => ".").join("\n")}</div>
             {children}
         </div>
         <ScrollBar
             direction="vertical"
-            value={scrollPosition}
-            setValue={setScrollPosition}
-            step={step}
+            valueMax ={offsetMax} 
+            value    ={offset   }
+            setValue ={setOffset}
+            step     ={1}
         />
     </div>;
-}
-
-function clamp(v: number) {
-    return Math.min(Math.max(v, 0), 1);
 }
