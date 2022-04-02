@@ -7,14 +7,10 @@
         "sourceMap": true,
         "incremental": true,
         "jsx": "react",
-        "jsxFactory": "Preact.createElement",
-        "jsxFragmentFactory": "Preact.Fragment",
         "moduleResolution": "node",
         "baseUrl": "./",
         "paths": {
-          "*":         ["src/script/*","src/*"],
-          "react":     ["node_modules/preact/compat"],
-          "react-dom": ["node_modules/preact/compat"]
+          "*":         ["src/script/*","src/*"]
         }
     },
     "include": ["src/**/*"],

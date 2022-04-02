@@ -9,7 +9,7 @@ declare module "*.json" {
 }
 
 declare module "*.svg" {
-    import * as Preact from "preact";
-    const value: Preact.ComponentType<Preact.JSX.SVGAttributes>;
+    import * as React from "react";
+    const value: SVGComponent;
     export default value;
 }

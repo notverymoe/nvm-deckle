@@ -1,4 +1,7 @@
 
+import * as React from "react";
+
+export type SVGComponent = React.ComponentType<React.SVGAttributes<any>>;
 
 export function registerOneShotDocumentEvent<K extends keyof DocumentEventMap>(type: K, listener: (ev: DocumentEventMap[K]) => (void | boolean)) {
     let disposed = false;

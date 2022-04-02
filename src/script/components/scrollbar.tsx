@@ -1,14 +1,14 @@
 import "./scrollbar.scss";
 
-import * as Preact from "preact";
+import * as React from "react";
 import { Button } from "./button";
-import { useRef } from "preact/hooks";
+import { useRef } from "react";
 
 import IconArrow from "assets/icons/arrow.svg";
 import IconMenu  from "assets/icons/menu.svg";
 import { joinClassNames } from "util/shared";
 
-export function ScrollBar({direction, value, setValue, valueMax, step, panRate, scrollRate, ["class"]: className}: {
+export function ScrollBar({direction, value, setValue, valueMax, step, panRate, scrollRate, className}: {
     direction: "vertical" | "horizontal",
     value: number,
     setValue: (v: number) => void,
@@ -16,7 +16,7 @@ export function ScrollBar({direction, value, setValue, valueMax, step, panRate, 
     valueMax?: number,
     panRate?: number,
     scrollRate?: number,
-    ["class"]?: string,
+    className?: string,
 }) {
     function clamp(v: number): number {
         return Math.min(Math.max(v, 0), valueMax ?? 1);
@@ -28,10 +28,10 @@ export function ScrollBar({direction, value, setValue, valueMax, step, panRate, 
     const refSlide = useRef<HTMLButtonElement | null>(null);
 
     return <div 
-        class={joinClassNames(`scrollbar`, direction, className)} 
-        style={{"--scrollbar-offset": `${offset}%`}}
+        className={joinClassNames(`scrollbar`, direction, className)} 
+        style={{"--scrollbar-offset": `${offset}%`} as any}
         onWheel={e => setValue(clamp(value + (scrollRate ?? 1)*step*Math.sign(e.deltaY)))}
-        onKeyDown={(e: KeyboardEvent) => {
+        onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
             switch(e.key) {
                 case "ArrowUp": {
                     if (direction !== "vertical") return;
@@ -56,7 +56,7 @@ export function ScrollBar({direction, value, setValue, valueMax, step, panRate, 
             }
         }}
     >
-        <div class="scrollbar-inner">
+        <div className="scrollbar-inner">
             <Button 
                 icon={IconArrow}
                 iconRotate={direction == "horizontal" ? 2 : 3}
@@ -65,13 +65,13 @@ export function ScrollBar({direction, value, setValue, valueMax, step, panRate, 
                 refElem={v => refUp.current = v}
             />
             <div 
-                class="scrollbar-slide"
+                className="scrollbar-slide"
                 onMouseDown={e => {
                     if ((e.buttons & 1) !== 1) return;
                     e.preventDefault();
             
                     const target = e.currentTarget;
-                    const update = (ev: MouseEvent) => {
+                    const update = (ev: React.MouseEvent<HTMLDivElement, MouseEvent> | MouseEvent) => {
                         refSlide.current?.focus();
 
                         const rect   = target.getBoundingClientRect();
@@ -90,7 +90,7 @@ export function ScrollBar({direction, value, setValue, valueMax, step, panRate, 
                     document.addEventListener("mouseup", () => document.removeEventListener("mousemove", cb));
                 }}
             >
-                <div class="scrollbar-slider">
+                <div className="scrollbar-slider">
                     <Button 
                         icon={IconMenu} 
                         refElem={v => refSlide.current = v}

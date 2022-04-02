@@ -1,4 +1,4 @@
-import * as Preact from "preact";
+import * as React from "react";
 
 import IconCardTypeArtifact     from "assets/cards/card-type-artifact.svg";
 import IconCardTypeCreature     from "assets/cards/card-type-creature.svg";
@@ -12,9 +12,10 @@ import IconCardTypeSorcery      from "assets/cards/card-type-sorcery.svg";
 import IconCardTypeUnknown      from "assets/cards/card-type-unknown.svg";
 import { CardDatabaseEntry } from "deckyard/types";
 import { CardType } from "deckyard/types/card_type";
+import { SVGComponent } from "components/util";
 
 
-const typeMap: Record<CardType, Preact.ComponentType<Preact.JSX.SVGAttributes> | null> = {
+const typeMap: Record<CardType, SVGComponent | null> = {
     [CardType.Artifact]:     IconCardTypeArtifact,
     [CardType.Creature]:     IconCardTypeCreature,
     [CardType.Enchantment]:  IconCardTypeEnchantment,
@@ -39,7 +40,7 @@ export function IconCardType({card}: {
 }) {
     const types = new Set<CardType>(card.faces.flatMap(v => v.types)); // TODO memo
     
-    let SVGIcon: Preact.ComponentType<Preact.JSX.SVGAttributes>;
+    let SVGIcon: SVGComponent;
     if (types.size === 1) {
         let cardType: CardType = types.keys().next()!.value;
         SVGIcon = typeMap[cardType] ?? (() => <></>);

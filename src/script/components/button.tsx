@@ -1,17 +1,15 @@
 import "./button.scss";
 
-import * as Preact from "preact";
+import * as React from "react";
 import { joinClassNames } from "util/shared";
 import { useInterval, useMemoAsync } from "./hooks";
-import { useCallback, useRef } from "preact/hooks";
-import { registerOneShotDocumentEvent } from "./util";
-
-const imgCache = new Map<string, string>();
+import { useCallback, useRef } from "react";
+import { registerOneShotDocumentEvent, SVGComponent } from "./util";
 
 export interface ButtonProps {
-    ["class"]?: string,
+    className?: string,
     action?: () => void,
-    icon?: Preact.ComponentType<Preact.JSX.SVGAttributes>,
+    icon?: SVGComponent,
     text?: string,
     title?: string,
     rate?: number,
@@ -21,17 +19,17 @@ export interface ButtonProps {
     refElem?: (v: HTMLButtonElement | null) => void,
 }
 
-export function ButtonGroup({["class"]: className, direction, children}: {
-    ["class"]?: string,
+export function ButtonGroup({className, direction, children}: {
+    className?: string,
     direction: "vertical" | "horizontal",
-    children?: Preact.ComponentChild[],
+    children?: React.ReactNode[],
 }) {
     return <div 
-        class={joinClassNames(`button-group ${direction}`, className)}
+        className={joinClassNames(`button-group ${direction}`, className)}
     >{children?.flatMap(v => [v, <ButtonSpacer/>]).splice(0, children?.length*2-1)}</div>;
 }
 
-export function Button({icon: Icon, text, title, action, rate, ["class"]: className, noCache, noRepeat, refElem, iconRotate}: ButtonProps) {
+export function Button({icon: Icon, text, title, action, rate, className, noCache, noRepeat, refElem, iconRotate}: ButtonProps) {
     const repeatSources = useRef(0);
     useInterval(() => {
         if (noRepeat || repeatSources.current === 0) return;
@@ -39,7 +37,7 @@ export function Button({icon: Icon, text, title, action, rate, ["class"]: classN
     }, rate ?? 20);
 
     return <button 
-        class={joinClassNames("button", className)}
+        className={joinClassNames("button", className)}
         onMouseDown={e => {
             if (noRepeat || e.button !== 0) return;
             repeatSources.current += 1;
@@ -64,15 +62,15 @@ export function Button({icon: Icon, text, title, action, rate, ["class"]: classN
         ref={refElem}
     >
         {Icon && <Icon 
-            class="button-icon"
+            className="button-icon"
             style={iconRotate ? {transform: `rotate(${iconRotate*90}deg)`} : undefined}
         />}
         {text && <div
-            class="button-text"
+            className="button-text"
         >{text}</div>}
     </button>;
 }
 
 function ButtonSpacer() {
-    return <div class="button-spacer"><div class="button-spacer-inner"/></div>;
+    return <div className="button-spacer"><div className="button-spacer-inner"/></div>;
 }

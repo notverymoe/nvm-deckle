@@ -1,11 +1,11 @@
 
 import "./ListCards.scss";
 
-import * as Preact from "preact";
+import * as React from "react";
 
 import { useRangeVirtual } from "components/hooks";
 import { VList } from "components/vlist";
-import { useEffect, useLayoutEffect, useState } from "preact/hooks";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { fromRange, isElementOrChildOf, joinClassNames } from "util/shared";
 import { CardDatabaseEntry } from "deckyard/types";
 import { IconCardType } from "./IconCardType";
@@ -44,7 +44,7 @@ export function ListCards({cards, selected, setSelected}: {
         setCount={setCount}
         setCountVis={setCountVis}
         setOffsetMax={setOffsetMax}
-        class={joinClassNames("list-cards", hasFocus && "focused", !hasFocus && "unfocused")}
+        className={joinClassNames("list-cards", hasFocus && "focused", !hasFocus && "unfocused")}
         eventsContent={{
             onFocus: () => setHasFocus(true),
             onBlur:  e => {
@@ -88,12 +88,12 @@ export function ListCardEntry({card, selected, setSelected}: {
     }, [card]);
 
     return <div 
-        class={joinClassNames("card-entry", selected && "selected")} 
+        className={joinClassNames("card-entry", selected && "selected")} 
         onClick={setSelected} 
     >
-        <div class="card-type"><IconCardType card={card}/></div>
-        <div class="card-name">{card.name}</div>
-        <div class="card-cost"><IconManaCost cost={card.faces[0].manaCost}/></div>
+        <div className="card-type"><IconCardType card={card}/></div>
+        <div className="card-name">{card.name}</div>
+        <div className="card-cost"><IconManaCost cost={card.faces[0].manaCost}/></div>
     </div>
 }
 

@@ -1,1 +1,1 @@
-import * as Preact from "preact";
+import * as React from "react";

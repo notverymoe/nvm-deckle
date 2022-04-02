@@ -1,12 +1,13 @@
 import "./IconManaSymbol.scss";
 
-import * as Preact from "preact";
+import * as React from "react";
 
 import { ManaColour, ManaSymbol } from "deckyard/types";
 
 import SymbolPhyrexian from "assets/cards/symbol-phyrexian.svg";
-import { useEffect, useLayoutEffect, useMemo, useState } from "preact/hooks";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { joinClassNames } from "util/shared";
+import { SVGComponent } from "components/util";
 
 
 export function IconManaCost({cost}: {cost: ManaSymbol[]}) {
@@ -18,12 +19,12 @@ export function IconManaCost({cost}: {cost: ManaSymbol[]}) {
 export function IconManaSymbol({colour}: {
     colour: ManaSymbol,
 }) {
-    const [colours, symbol, text] = useMemo((): [string[], Preact.ComponentType<Preact.JSX.SVGAttributes> | undefined, string] => {
+    const [colours, symbol, text] = useMemo((): [string[], SVGComponent | undefined, string] => {
         let fillColours: string[] = [];
         let phy  = undefined;
         let text = "";
 
-        function process(colour: ManaColour): [string | undefined, Preact.ComponentType<Preact.JSX.SVGAttributes> | undefined, string | undefined] {
+        function process(colour: ManaColour): [string | undefined, SVGComponent | undefined, string | undefined] {
             switch(colour) {
                 case ManaColour.White:      return ["mana-white", undefined,       undefined];
                 case ManaColour.Blue:       return ["mana-blue",  undefined,       undefined];
@@ -72,19 +73,19 @@ function CardSymbol({
     text,
     colours,
 }: {
-    symbol?: Preact.ComponentType<Preact.JSX.SVGAttributes>,
+    symbol?: SVGComponent,
     text?: string,
     colours: string[],
 }) {
     let Icon = symbol ?? (() => <></>);
 
-    return <div class="card-symbol-root">
-        <div class={joinClassNames("card-symbol-background", colours[0])}>
-            <div class={joinClassNames("card-symbol-left",  colours[0])}/>
-            <div class={joinClassNames("card-symbol-right", colours[1] ?? colours[0])}/>
+    return <div className="card-symbol-root">
+        <div className={joinClassNames("card-symbol-background", colours[0])}>
+            <div className={joinClassNames("card-symbol-left",  colours[0])}/>
+            <div className={joinClassNames("card-symbol-right", colours[1] ?? colours[0])}/>
         </div>
-        <div class="card-symbol-text">{text}</div>
-        <Icon class="card-symbol-icon" onSelect={e => e.preventDefault()}/>
+        <div className="card-symbol-text">{text}</div>
+        <Icon className="card-symbol-icon" onSelect={e => e.preventDefault()}/>
     </div>
 
 }

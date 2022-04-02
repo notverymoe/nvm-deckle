@@ -1,11 +1,11 @@
 import "./vlist.scss";
 
-import * as Preact from "preact";
-import { useCallback, useEffect, useState } from "preact/hooks";
+import * as React from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ScrollBar } from "./scrollbar";
 import { joinClassNames } from "util/shared";
 
-export function VList({length, offset, setOffset, setCount, setCountVis, setOffsetMax, lines: linesRaw, children, ["class"]: className, events, eventsContent: evenstContent, refElem, tabIndex}: {
+export function VList({length, offset, setOffset, setCount, setCountVis, setOffsetMax, lines: linesRaw, children, className, events, eventsContent: evenstContent, refElem, tabIndex}: {
     length: number,
     offset: number,
     setOffset:     (v: number) => void,
@@ -13,10 +13,10 @@ export function VList({length, offset, setOffset, setCount, setCountVis, setOffs
     setCountVis?:  (v: number) => void,
     setOffsetMax?: (v: number) => void,
     lines?: number,
-    ["class"]?: string,
-    children?: Preact.VNode[],
-    events?:        Partial<Preact.JSX.DOMAttributes<HTMLDivElement>>,
-    eventsContent?: Partial<Preact.JSX.DOMAttributes<HTMLDivElement>>,
+    className?: string,
+    children?: React.ReactNode[],
+    events?:        Partial<React.DOMAttributes<HTMLDivElement>>,
+    eventsContent?: Partial<React.DOMAttributes<HTMLDivElement>>,
     refElem?: (v: HTMLDivElement | null) => void,
     tabIndex?: number,
 }) {
@@ -35,17 +35,17 @@ export function VList({length, offset, setOffset, setCount, setCountVis, setOffs
         setOffsetMax?.(offsetMax);
     }, [countReal, countDisp, offsetMax]);
 
-    return <div {...events} class={joinClassNames("vlist", className)} ref={refElem}>
+    return <div {...events} className={joinClassNames("vlist", className)} ref={refElem}>
         <div
             {...evenstContent}
-            class="vlist-content" 
+            className="vlist-content" 
             ref={setRefContent} 
-            style={{"--entry-height": `${refContentSize?.clientHeight ?? 0}px`}}
+            style={{"--entry-height": `${refContentSize?.clientHeight ?? 0}px`} as any}
             onWheel={e => setOffset(offset + Math.sign(e.deltaY))}
             tabIndex={tabIndex}
         >
             <div 
-                class="vlist-content-scaler"
+                className="vlist-content-scaler"
                 ref={setRefContentSize}
             >{Array.from({length: lines}, () => ".").join("\n")}</div>
             {children}
