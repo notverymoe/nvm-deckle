@@ -1,21 +1,63 @@
 
 
 .list-cards {
-    
-    &.focused .card-entry {
-        background-color: grey;
+    background-color: darkblue;
 
-        &.selected {
-            background-color: pink;
+    .card-entry {
+        padding: 0 0.25em;
+
+        user-select: none;;
+
+        display: flex;
+        height: 1em;
+
+        .card-name {
+            flex: 1 1;
+        }
+
+        .card-type {
+            width: 1em;
+            // Unused
+            //.icon-card-type {
+            //    &.rarity-common   * { fill: #000; stroke: #000; }
+            //    &.rarity-uncommon * { fill: #abb; stroke: #abb; }
+            //    &.rarity-rare     * { fill: #ba5; stroke: #ba5; }
+            //    &.rarity-mythic   * { fill: #e72; stroke: #e72; }
+            //}
+        }
+
+        .card-cost {
+            width: min-content;
+
+            display: grid;
+            grid-auto-columns: 1fr;
+            grid-auto-rows: 1fr;
+            grid-auto-flow: column;
+            justify-content: center;
+            align-items: center;
+
+
+            > * {
+                width: 1em;
+                height: 1em;
+            }
         }
     }
 
-    &.unfocused .card-entry {
-        background-color: darkblue;
+    
+    &.focused {
 
-        &.selected {
-            background-color: darkred;
+        .vlist-content {
+            box-shadow: inset 0 0 0 1px var(--accent-1);
         }
+
+        .card-entry.selected {
+            box-shadow: inset 0 0 0 1px var(--accent-1);
+        }
+    }
+
+    &.unfocused .card-entry.selected {
+        box-shadow: inset 0 0 0 1px var(--accent-3);
     }
 
 }

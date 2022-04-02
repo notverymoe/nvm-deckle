@@ -5,9 +5,11 @@ import * as Preact from "preact";
 
 import { useRangeVirtual } from "components/hooks";
 import { VList } from "components/vlist";
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useLayoutEffect, useState } from "preact/hooks";
 import { fromRange, isElementOrChildOf, joinClassNames } from "util/shared";
 import { CardDatabaseEntry } from "deckyard/types";
+import { IconCardType } from "./IconCardType";
+import { IconManaCost, IconManaSymbol } from "./IconManaSymbol";
 
 export function ListCards({cards, selected, setSelected}: {
     selected:    number,
@@ -26,7 +28,7 @@ export function ListCards({cards, selected, setSelected}: {
 
     const cardsShown = useRangeVirtual<CardDatabaseEntry | undefined>((i, length) => fromRange(i, length, j => cards[j]), offset, count);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (selected < offset) {
             setOffset(Math.max(0, selected));
         } else if (selected >= offset+countVis) {
@@ -43,19 +45,24 @@ export function ListCards({cards, selected, setSelected}: {
         setCountVis={setCountVis}
         setOffsetMax={setOffsetMax}
         class={joinClassNames("list-cards", hasFocus && "focused", !hasFocus && "unfocused")}
-        events={{
-            onKeyDown: (e) => {
-                if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-                    e.preventDefault();  
-                    const next = selected + (e.key === "ArrowDown" ? 1 : -1);
-                    setSelected(Math.min(cards.length-1, Math.max(0, next)));
-                }
-            },
+        eventsContent={{
             onFocus: () => setHasFocus(true),
-            onBlur:  (e) => {
+            onBlur:  e => {
                 if (!isElementOrChildOf(e.relatedTarget as HTMLElement, e.currentTarget)) {
                     setHasFocus(false);
                 }
+            },
+            onKeyDown: e => {
+                const arrowDown = e.code === "ArrowDown";
+                const arrowUp   = e.code === "ArrowUp";
+                const tab       = e.code === "Tab";
+
+                if (!arrowDown && !arrowUp && !tab) return;
+                e.preventDefault();  
+                const next = selected + (tab
+                    ? (e.shiftKey ? -1 :  1)
+                    : ( arrowDown ?  1 : -1));
+                setSelected(Math.min(cards.length-1, Math.max(0, next)));
             },
         }}
         tabIndex={0}
@@ -63,8 +70,8 @@ export function ListCards({cards, selected, setSelected}: {
         ? <ListCardEntry 
             key={i} 
             card={v} 
-            selected={v.id === selected}
-            setSelected={() => setSelected(v.id)}
+            selected={offset+i === selected}
+            setSelected={() => setSelected(offset+i)}
         />
         : <div/>
     )}</VList>;
@@ -75,9 +82,18 @@ export function ListCardEntry({card, selected, setSelected}: {
     setSelected: () => void,
     selected: boolean,
 }) {
+    useEffect(() => {
+        if (!selected) return;
+        console.log(card);
+    }, [card]);
+
     return <div 
-        className={joinClassNames("card-entry", selected && "selected")} 
+        class={joinClassNames("card-entry", selected && "selected")} 
         onClick={setSelected} 
-    >{card.name}</div>
+    >
+        <div class="card-type"><IconCardType card={card}/></div>
+        <div class="card-name">{card.name}</div>
+        <div class="card-cost"><IconManaCost cost={card.faces[0].manaCost}/></div>
+    </div>
 }
 

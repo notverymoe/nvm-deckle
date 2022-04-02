@@ -23,7 +23,7 @@
         background-color: var(--bg-panel-1);
         overflow-y: hidden;
 
-        :not(:first-child) {
+        > :not(:first-child) {
             min-height: var(--entry-height);
             height:     var(--entry-height);
             max-height: var(--entry-height);

@@ -1,0 +1,75 @@
+
+
+.card-symbol-root {
+    position: relative;
+
+    overflow: hidden;
+    border-radius: 100%;
+    box-shadow: black 0 0 1px;
+    margin: 1px;
+
+
+    .card-symbol-background {
+        position: absolute;
+        inset: 0;
+        transform: rotate(45deg);
+        background-color: #AAA;
+    
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+
+        .card-symbol-left, .card-symbol-right {
+            background-color: #AAA;
+            width: 50%;
+            height: 100%;;
+        }
+
+        // TODO fix
+        &, .card-symbol-left, .card-symbol-right {
+            &.mana-white {
+                background-color: #FF7;
+            }
+
+            &.mana-red {
+                background-color: #F77;
+            }
+
+            &.mana-blue {
+                background-color: #77F;
+            }
+
+            &.mana-green {
+                background-color: #7FA;
+            }
+
+            &.mana-black {
+                background-color: #A7F;
+            }
+        }
+    }
+
+    .card-symbol-text {
+        color: black;
+        font-weight: bolder;
+
+        position: absolute;
+        inset: 0;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .card-symbol-icon {
+        position: absolute;
+        inset: 0;
+        align-items: center;
+        justify-content: center;
+
+
+    }
+
+}
+

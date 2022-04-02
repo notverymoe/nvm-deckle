@@ -37,13 +37,22 @@ module.exports = {
                 ],
             },
             {
-                test: /\.(png|jpe?g|gif|webp|svg|json)$/i,
+                test: /\.(png|jpe?g|gif|webp|json)$/i,
                 loader: 'file-loader',
                 type: 'javascript/auto',
                 options: {
                     name: '[name].[ext]'
                 }
-            }
+            },
+            {
+                test: /\.svg$/i,
+                issuer: /\.[jt]sx?$/,
+                loader: '@svgr/webpack',
+                options: { 
+                    typescript: true,
+                    ref: true,
+                },
+            },
         ],
     },
     resolve: { 

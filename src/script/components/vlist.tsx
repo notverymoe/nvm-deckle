@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "preact/hooks";
 import { ScrollBar } from "./scrollbar";
 import { joinClassNames } from "util/shared";
 
-export function VList({length, offset, setOffset, setCount, setCountVis, setOffsetMax, lines: linesRaw, children, ["class"]: className, events, refElem, tabIndex}: {
+export function VList({length, offset, setOffset, setCount, setCountVis, setOffsetMax, lines: linesRaw, children, ["class"]: className, events, eventsContent: evenstContent, refElem, tabIndex}: {
     length: number,
     offset: number,
     setOffset:     (v: number) => void,
@@ -15,7 +15,8 @@ export function VList({length, offset, setOffset, setCount, setCountVis, setOffs
     lines?: number,
     ["class"]?: string,
     children?: Preact.VNode[],
-    events?: Partial<Preact.JSX.DOMAttributes<HTMLDivElement>>,
+    events?:        Partial<Preact.JSX.DOMAttributes<HTMLDivElement>>,
+    eventsContent?: Partial<Preact.JSX.DOMAttributes<HTMLDivElement>>,
     refElem?: (v: HTMLDivElement | null) => void,
     tabIndex?: number,
 }) {
@@ -36,6 +37,7 @@ export function VList({length, offset, setOffset, setCount, setCountVis, setOffs
 
     return <div {...events} class={joinClassNames("vlist", className)} ref={refElem}>
         <div
+            {...evenstContent}
             class="vlist-content" 
             ref={setRefContent} 
             style={{"--entry-height": `${refContentSize?.clientHeight ?? 0}px`}}

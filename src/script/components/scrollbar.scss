@@ -10,7 +10,7 @@ $scrollbar-size: 1em;
 
     border-radius: 0.25em;
     
-    .button, .button-icon {
+    .button, .button .button-icon {
         width:  $scrollbar-size;
         min-width:  $scrollbar-size;
         max-width:  $scrollbar-size;

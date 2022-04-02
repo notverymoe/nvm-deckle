@@ -11,7 +11,7 @@ const imgCache = new Map<string, string>();
 export interface ButtonProps {
     ["class"]?: string,
     action?: () => void,
-    icon?: string,
+    icon?: Preact.ComponentType<Preact.JSX.SVGAttributes>,
     text?: string,
     title?: string,
     rate?: number,
@@ -31,19 +31,7 @@ export function ButtonGroup({["class"]: className, direction, children}: {
     >{children?.flatMap(v => [v, <ButtonSpacer/>]).splice(0, children?.length*2-1)}</div>;
 }
 
-export function Button({icon, text, title, action, rate, ["class"]: className, noCache, noRepeat, refElem, iconRotate}: ButtonProps) {
-    const [,img,] = useMemoAsync(async () => {
-        if (!icon) return "";
-        if (!noCache) {
-            const existing = imgCache.get(icon);
-            if (existing) return existing;
-        }
-
-        const result = await (await fetch(icon)).text();
-        if (!noCache) imgCache.set(icon, result);
-        return result;
-    }, [icon]);
-
+export function Button({icon: Icon, text, title, action, rate, ["class"]: className, noCache, noRepeat, refElem, iconRotate}: ButtonProps) {
     const repeatSources = useRef(0);
     useInterval(() => {
         if (noRepeat || repeatSources.current === 0) return;
@@ -75,10 +63,9 @@ export function Button({icon, text, title, action, rate, ["class"]: className, n
         title={title}
         ref={refElem}
     >
-        {img && <div 
+        {Icon && <Icon 
             class="button-icon"
             style={iconRotate ? {transform: `rotate(${iconRotate*90}deg)`} : undefined}
-            dangerouslySetInnerHTML={{__html: img}}
         />}
         {text && <div
             class="button-text"
