@@ -65,7 +65,8 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-            title: 'Temporary Title'
+            title: 'Temporary Title',
+            
         }),
         new MiniCssExtractPlugin({
             filename: '[name].css'

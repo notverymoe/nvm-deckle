@@ -53,12 +53,12 @@ html {
 }
 
 body {
-    background-color: var(--bg-panel-3);
-    color:            var(--fg-panel-3);
+    background-color: var(--bg-panel-2);
+    color:            var(--fg-panel-2);
 }
 
-html, body {
-    width: 100vh;
+html, body, main {
+    width: 100vw;
     height: 100vh;
     overflow: hidden;
     margin: 0;

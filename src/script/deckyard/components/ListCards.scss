@@ -1,58 +1,74 @@
 
 
-.list-cards {
-    background-color: darkblue;
+.vlist.list-cards {
+    .vlist-content {
+        border-radius: 0.25em 0 0 0.25em;
+        background-color: var(--bg-panel-3);
 
-    .card-entry {
-        padding: 0 0.25em;
+        .card-entry {
+            position: relative;
+            overflow: hidden;
+            padding: 0 0.25em;
 
-        user-select: none;;
+            user-select: none;;
 
-        display: flex;
-        height: 1em;
-
-        .card-name {
-            flex: 1 1;
-        }
-
-        .card-type {
-            width: 1em;
-            // Unused
-            //.icon-card-type {
-            //    &.rarity-common   * { fill: #000; stroke: #000; }
-            //    &.rarity-uncommon * { fill: #abb; stroke: #abb; }
-            //    &.rarity-rare     * { fill: #ba5; stroke: #ba5; }
-            //    &.rarity-mythic   * { fill: #e72; stroke: #e72; }
-            //}
-        }
-
-        .card-cost {
-            width: min-content;
-
-            display: grid;
-            grid-auto-columns: 1fr;
-            grid-auto-rows: 1fr;
-            grid-auto-flow: column;
-            justify-content: center;
+            display: flex;
             align-items: center;
 
+            height: 1em;
 
-            > * {
+            .card-name {
+                margin-left: 0.25em;
+                flex: 1 1;
+                min-width: 0;
+                text-overflow: ellipsis;
+                overflow-x:    hidden;;
+                font-size: 90%;
+            }
+
+            .card-type {
                 width: 1em;
-                height: 1em;
+                * { fill: var(--accent-3); }
+
+                // Unused
+                //.icon-card-type {
+                //    &.rarity-common   * { fill: #000; stroke: #000; }
+                //    &.rarity-uncommon * { fill: #abb; stroke: #abb; }
+                //    &.rarity-rare     * { fill: #ba5; stroke: #ba5; }
+                //    &.rarity-mythic   * { fill: #e72; stroke: #e72; }
+                //}
+            }
+
+            .card-cost {
+                width: min-content;
+
+                display: grid;
+                grid-auto-columns: 1fr;
+                grid-auto-rows: 1fr;
+                grid-auto-flow: column;
+                justify-content: center;
+                align-items: center;
+
+                > * {
+                    width: 1em;
+                    height: 1em;
+                }
             }
         }
     }
+}
 
+.vlist.list-cards {
+    border-radius: 0.25em;
     
     &.focused {
-
         .vlist-content {
             box-shadow: inset 0 0 0 1px var(--accent-1);
-        }
 
-        .card-entry.selected {
-            box-shadow: inset 0 0 0 1px var(--accent-1);
+            .card-entry.selected {
+                box-shadow: inset 0 0 0 1px var(--accent-1), 0 0 4px 1px black;
+                background-color: var(--bg-input-0);
+            }
         }
     }
 

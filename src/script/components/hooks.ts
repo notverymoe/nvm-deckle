@@ -74,12 +74,45 @@ export function useRangeVirtual<T>(
     const result = React.useRef<T[]>([]);
 
     const currentDeps = [index, count, limit, ...(deps ?? [])];
-    const lastDeps    = React.useRef(currentDeps);
+    const lastDeps    = React.useRef<any[]>([0, 0]);
 
     if(areDepsDifferent(currentDeps, lastDeps.current)) {
-        // TODO PERF Reuse non-invalidated entries
+        const oldStart: number = lastDeps.current[0];
+        const oldEnd:   number = oldStart + result.current.length;
+
+        let start = index; 
+        let end   = limit == null ? index + count : Math.min(limit, index + count);
+
         lastDeps.current = currentDeps;
-        result.current = callback(index, Math.min((limit ?? (index + count)) - index, count));
+
+        if (start !== oldStart || end !== oldEnd) {
+            if ((end < oldStart) || (start >= oldEnd)) {
+                // No overlap
+                result.current = callback(index, end - index);
+            } else {
+    
+                if (start < oldStart) {
+                    // Start shifted backwards, lengthen
+                    result.current.unshift(...callback(start, oldStart - start));
+                } else if (start > oldStart) {
+                    // Start shifted forwards, shorten
+                    result.current.splice(0, start - oldStart);
+                }
+    
+                if (end < oldEnd) {
+                    // End shifted backwards, shorten
+                    result.current.length -= oldEnd - end;
+                } else if (end > oldEnd) {
+                    // End shifted forwards, lengthen
+                    result.current.push(...callback(oldEnd, end-oldEnd));
+                }
+
+                result.current = [...result.current];
+            }
+        }
+
+
+        // TODO PERF Reuse non-invalidated entries
     }
 
     return result.current;
@@ -107,5 +140,25 @@ export function useInterval(callback: () => void | Promise<void>, rate: number) 
         };
         let currentTimeout = setTimeout(cb, wrapped.current.rate);
         return () => clearTimeout(currentTimeout);
+    }, []);
+}
+
+export function useAnimationFrame(callback: () => void | Promise<void>) {
+
+    const wrapped = React.useRef(callback);
+    wrapped.current = callback;
+
+    React.useEffect(() => {
+        const cb = async () => {
+            try{
+                await wrapped.current();
+            } catch(e) {
+                console.error(e);
+            } finally {
+                currentTimeout = requestAnimationFrame(cb);
+            }
+        };
+        let currentTimeout = requestAnimationFrame(cb);
+        return () => cancelAnimationFrame(currentTimeout);
     }, []);
 }

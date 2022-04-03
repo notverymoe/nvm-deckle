@@ -6,6 +6,7 @@
         "removeComments": true,
         "sourceMap": true,
         "incremental": true,
+        "allowSyntheticDefaultImports": true,
         "jsx": "react",
         "moduleResolution": "node",
         "baseUrl": "./",
