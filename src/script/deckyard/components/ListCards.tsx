@@ -3,7 +3,7 @@ import "./ListCards.scss";
 
 import * as React from "react";
 
-import { useRangeVirtual } from "components/hooks";
+import { useDeferredAction, useRangeVirtual } from "components/hooks";
 import { VList } from "components/vlist";
 import { createContext, useContext, useEffect, useLayoutEffect, useState } from "react";
 import { fromRange, isElementOrChildOf, joinClassNames } from "util/shared";
@@ -65,6 +65,11 @@ function ListCardInner({cards, selected, setSelected, count, offset, setOffset, 
         : <div key={i+j}/>
     ), offset, count, undefined, [cards]);
 
+
+    const scrollToSelection = useDeferredAction((direction: number) => {
+        setSelected(Math.min(cards.length-1, Math.max(0, selected + direction)));
+    }, 8);
+
     return <selectionContext.Provider value={{selected, setSelected}}>
         <VList 
             lines={1} 
@@ -88,11 +93,8 @@ function ListCardInner({cards, selected, setSelected, count, offset, setOffset, 
                     const tab       = e.code === "Tab";
 
                     if (!arrowDown && !arrowUp && !tab) return;
-                    e.preventDefault();  
-                    const next = selected + (tab
-                        ? (e.shiftKey ? -1 :  1)
-                        : ( arrowDown ?  1 : -1));
-                    setSelected(Math.min(cards.length-1, Math.max(0, next)));
+                    e.preventDefault();
+                    scrollToSelection(tab ? (e.shiftKey ? -1 : 1) : (arrowUp ? -1 : 1));
                 },
             }}
             tabIndex={0}

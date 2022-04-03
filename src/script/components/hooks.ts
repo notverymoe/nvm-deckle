@@ -162,3 +162,39 @@ export function useAnimationFrame(callback: () => void | Promise<void>) {
         return () => cancelAnimationFrame(currentTimeout);
     }, []);
 }
+
+export function useDeferredAction<T extends (...args: any) => any>(
+    callback: T, 
+    delay?: number
+): (...v: Parameters<T>) => void {
+
+    // TODO promise
+    // TODO animation frame
+    // TODO mutable argument callback, ie ( transformArguments(v => v[0] + 1 ) )
+    //      might not be a clean syntax for this...
+
+    const state = React.useMemo(() => ({
+        timeout: -1,
+        args:    null as (Parameters<T> | null),
+        callback,
+        delay,
+    }), []);
+    state.callback = callback;
+    state.delay    = delay;
+
+    React.useEffect(() => {
+        return () => { if (state.timeout >= 0) clearTimeout(state.timeout); };
+    }, []);
+
+    return React.useCallback((...v: Parameters<T>) => {
+        state.args = v;
+        if (state.timeout < 0) {
+            state.timeout = setTimeout(() => {
+                state.timeout = -1;
+                const args = state.args;
+                state.args = null;
+                state.callback.apply(state.callback, args!);
+            }, state.delay);
+        }
+    }, []);
+}
