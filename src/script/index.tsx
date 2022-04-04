@@ -1,5 +1,6 @@
 
 import "style/main.scss";
+import "./index.scss";
 
 //import cat_img from "asset/cat.gif";
 
@@ -9,6 +10,7 @@ import { createRoot } from "react-dom/client";
 import { useMemoAsync    } from "components/hooks";
 import { loadAtomicCards } from "api";
 import { ListCards       } from "deckyard/components/ListCards";
+import { CardDetails } from "deckyard/components/CardDetails";
 
 (async function() {
     const rootElem = document.getElementById("app-root");
@@ -24,8 +26,11 @@ function RenderPage() {
     const [selected, setSelected] = React.useState(0);
 
     return <>
-        <h1>Cards</h1>
-        {!loaded && <>Loading...</>}
-        {db && <ListCards selected={selected} setSelected={setSelected} cards={db.cards}/>}
+        <CardDetails card={db?.cards[selected]}/>
+        <div>
+            <h1>Cards</h1>
+            {!loaded && <>Loading...</>}
+            {db && <ListCards selected={selected} setSelected={setSelected} cards={db.cards}/>}
+        </div>
     </>;
 }

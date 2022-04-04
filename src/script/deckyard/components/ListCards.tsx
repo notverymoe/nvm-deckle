@@ -65,10 +65,11 @@ function ListCardInner({cards, selected, setSelected, count, offset, setOffset, 
         : <div key={i+j}/>
     ), offset, count, undefined, [cards]);
 
-
-    const scrollToSelection = useDeferredAction((direction: number) => {
-        setSelected(Math.min(cards.length-1, Math.max(0, selected + direction)));
-    }, 8);
+    // TODO move scroll & focus logic to a lower level...
+    const scrollToSelection = useDeferredAction(
+        (step) => setSelected(Math.min(cards.length-1, Math.max(0, selected + step))), 
+        8
+    );
 
     return <selectionContext.Provider value={{selected, setSelected}}>
         <VList 

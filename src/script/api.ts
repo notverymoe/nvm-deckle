@@ -3,11 +3,11 @@ import * as Tauri from "@tauri-apps/api";
 
 import AtomicCardsJson from "assets/AtomicCards.json";
 import SetListJson from "assets/SetList.json";
-import { CardDatabase, convertFromMTGJSONAtomicCards } from "deckyard/types";
+import { Card, convertFromMTGJSONAtomicCards } from "deckyard/types";
 
 import { CardAtomicFile, SetListFile } from "./mtgjson/files";
 
-export async function loadAtomicCards(): Promise<CardDatabase> {
+export async function loadAtomicCards(): Promise<Card> {
     try {
         const contents = await Tauri.fs.readTextFile("data/AtomicCards.json", {dir: Tauri.fs.BaseDirectory.App});
         return JSON.parse(contents);
