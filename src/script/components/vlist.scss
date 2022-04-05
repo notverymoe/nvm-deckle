@@ -2,8 +2,7 @@
 .vlist {
     display: flex;
     flex-direction: row;
-    height: 50em;
-    width: 30em;
+    min-height: 1em;
     overflow: hidden;
 
     .vlist-content {

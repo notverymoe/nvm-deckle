@@ -7,7 +7,7 @@ import { useDeferredAction, useRangeVirtual } from "components/hooks";
 import { VList } from "components/vlist";
 import { createContext, useContext, useEffect, useLayoutEffect, useState } from "react";
 import { fromRange, isElementOrChildOf, joinClassNames } from "util/shared";
-import { CardDatabaseEntry } from "deckyard/types";
+import { Card } from "deckyard/types";
 import { IconCardType } from "./IconCardType";
 import { IconManaCostSet } from "./IconManaSymbol";
 
@@ -16,7 +16,7 @@ const selectionContext = createContext<{selected: number, setSelected: (idx: num
 export function ListCards({cards, selected, setSelected}: {
     selected:    number,
     setSelected: (v: number) => void,
-    cards:       CardDatabaseEntry[],
+    cards:       Card[],
 }) {
     const [offset,    setOffsetRaw] = useState(0);
     const [offsetMax, setOffsetMax] = useState(0);
@@ -50,7 +50,7 @@ export function ListCards({cards, selected, setSelected}: {
 function ListCardInner({cards, selected, setSelected, count, offset, setOffset, setCount, setCountVis, setOffsetMax}: {
     selected:    number,
     setSelected: (v: number) => void,
-    cards:       CardDatabaseEntry[],
+    cards:       Card[],
     count: number,
     offset: number,
     setOffset:     (v: number) => void,
@@ -103,7 +103,7 @@ function ListCardInner({cards, selected, setSelected, count, offset, setOffset, 
     </selectionContext.Provider>;
 }
 
-export function ListCardEntry({card}: {card: CardDatabaseEntry}) {
+export function ListCardEntry({card}: {card: Card}) {
     const selection = useContext(selectionContext);
 
     return <div 

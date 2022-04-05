@@ -4,15 +4,15 @@ import { Layout, normalizeCardLayout } from "./card_layout";
 import { CardType, normalizeCardTypes } from "./card_type";
 import { ManaSymbol, parseManaCost } from "./mana";
 
-export interface CardDatabaseEntry {
+export interface Card {
     id: number,
     name: string,
     faces: CardFace[],
     layout: Layout,
 }
 
-export interface Card {
-    cards: CardDatabaseEntry[],
+export interface CardDatabase {
+    cards: Card[],
 }
 
 export type CardFace = Omit<CardAtomic, "manaCost" | "types" | "layout" | "side"> & {
@@ -20,7 +20,7 @@ export type CardFace = Omit<CardAtomic, "manaCost" | "types" | "layout" | "side"
     types:    CardType[],
 };
 
-export function convertFromMTGJSONAtomicCards(db: CardAtomicFile): Card {
+export function convertFromMTGJSONAtomicCards(db: CardAtomicFile): CardDatabase {
 
     console.log([...(new Set(Object.entries(db.data).flatMap(v => v[1].map(v => v.side)))).values()])
 

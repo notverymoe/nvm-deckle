@@ -1,51 +1,50 @@
 
-.face-details {
-    height: 100%;;
+.card-details {
     display: flex;
     flex-direction: column;
 
-    .shadowbox {
+    .face-details {
         display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: rgba(0,0,0,0.5);
+        flex-direction: column;
 
-        min-height: 35%;
-        max-height: 35%;
 
-        .image {
-            border-radius: 0.8em;
-            height: 100%;
+        .row-0 {
+            height: 1em;
+            display: flex;
+            flex-direction: row;
 
-        }
-    }
-
-    .top {
-        height: 1em;
-        display: flex;
-        flex-direction: row;
-
-        .name {
-            flex: 1 1;
-
-        }
-        
-        .cost {
-            width: min-content;
-            display: grid;
-            grid-auto-columns: 1fr;
-            grid-auto-rows: 1fr;
-            grid-auto-flow: column;
-            justify-content: center;
-            align-items: center;
-            > * {
-                width: 1em;
-                height: 1em;
+            .name {
+                flex: 1 1;
+            }
+            
+            .cost {
+                width: min-content;
+                display: grid;
+                grid-auto-columns: 1fr;
+                grid-auto-rows: 1fr;
+                grid-auto-flow: column;
+                justify-content: center;
+                align-items: center;
+                > * {
+                    width: 1em;
+                    height: 1em;
+                }
             }
         }
-    }
-    
-    .text {
+
+        .row-1 {
+            height: 1em;
+            display: flex;
+            flex-direction: row;
+
+            .type {
+                flex: 1 1;
+            }
+        }
         
+        .text {
+            flex: 1 1;
+            
+        }
     }
 }

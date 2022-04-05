@@ -10,7 +10,7 @@ import IconCardTypeMixed        from "assets/cards/card-type-mixed.svg";
 import IconCardTypePlaneswalker from "assets/cards/card-type-planeswalker.svg";
 import IconCardTypeSorcery      from "assets/cards/card-type-sorcery.svg";
 import IconCardTypeUnknown      from "assets/cards/card-type-unknown.svg";
-import { CardDatabaseEntry } from "deckyard/types";
+import { Card } from "deckyard/types";
 import { CardType } from "deckyard/types/card_type";
 import { SVGComponent } from "components/util";
 
@@ -36,7 +36,7 @@ const typeMap: Record<CardType, SVGComponent | null> = {
 };
 
 export function IconCardType({card}: {
-    card: CardDatabaseEntry
+    card: Card
 }) {
     const types = new Set<CardType>(card.faces.flatMap(v => v.types)); // TODO memo
     

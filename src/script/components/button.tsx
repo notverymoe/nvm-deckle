@@ -14,7 +14,7 @@ export interface ButtonProps {
     title?: string,
     rate?: number,
     noCache?: boolean,
-    noRepeat?: boolean,
+    repeat?: boolean,
     iconRotate?: number,
     refElem?: (v: HTMLButtonElement | null) => void,
 }
@@ -29,17 +29,17 @@ export function ButtonGroup({className, direction, children}: {
     >{children?.flatMap(v => [v, <ButtonSpacer/>]).splice(0, children?.length*2-1)}</div>;
 }
 
-export function Button({icon: Icon, text, title, action, rate, className, noCache, noRepeat, refElem, iconRotate}: ButtonProps) {
+export function Button({icon: Icon, text, title, action, rate, className, noCache, repeat, refElem, iconRotate}: ButtonProps) {
     const repeatSources = useRef(0);
     useInterval(() => {
-        if (noRepeat || repeatSources.current === 0) return;
+        if (!repeat || repeatSources.current === 0) return;
         action?.();
     }, rate ?? 20);
 
     return <button 
         className={joinClassNames("button", className)}
         onMouseDown={e => {
-            if (noRepeat || e.button !== 0) return;
+            if (!repeat || e.button !== 0) return;
             repeatSources.current += 1;
             registerOneShotDocumentEvent("mouseup", e => {
                 if (e.button !== 0) return;
@@ -47,7 +47,7 @@ export function Button({icon: Icon, text, title, action, rate, className, noCach
             });
         }}
         onKeyDown={e => {
-            if ((noRepeat && e.repeat) || e.key !== " ") return;
+            if ((!repeat && e.repeat) || e.key !== " ") return;
             action?.();
         }}
         onClick={e => {

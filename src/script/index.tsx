@@ -11,6 +11,7 @@ import { useMemoAsync    } from "components/hooks";
 import { loadAtomicCards } from "api";
 import { ListCards       } from "deckyard/components/ListCards";
 import { CardDetails } from "deckyard/components/CardDetails";
+import { CardImage } from "deckyard/components/CardImage";
 
 (async function() {
     const rootElem = document.getElementById("app-root");
@@ -25,12 +26,20 @@ function RenderPage() {
 
     const [selected, setSelected] = React.useState(0);
 
-    return <>
-        <CardDetails card={db?.cards[selected]}/>
-        <div>
-            <h1>Cards</h1>
+    return <div className="layout-normal">
+        <div className="panel-database">
             {!loaded && <>Loading...</>}
             {db && <ListCards selected={selected} setSelected={setSelected} cards={db.cards}/>}
         </div>
-    </>;
+        <div className="panel-deck-main">
+            {!loaded && <>Loading...</>}
+            {db && <ListCards selected={selected} setSelected={setSelected} cards={db.cards}/>}
+        </div>
+        <div className="panel-deck-side">
+            {!loaded && <>Loading...</>}
+            {db && <ListCards selected={selected} setSelected={setSelected} cards={db.cards}/>}
+        </div>
+        <div className="panel-card-image"><CardImage card={db?.cards[selected]}/></div>
+        <div className="panel-card-text"><CardDetails card={db?.cards[selected]}/></div>
+    </div>;
 }

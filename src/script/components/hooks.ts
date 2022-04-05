@@ -8,6 +8,7 @@ export function useMemoAsync<T>(callback: () => Promise<T>, deps?: any[]): [bool
     const [result, setResult] = React.useState<[boolean, T | undefined, Error | undefined]>([false, undefined, undefined]);
 
     React.useEffect(() => {
+        setResult([false, undefined, undefined]);
         const req = ++reqCount.current;
         callback().then(v => {
             if (req != reqCount.current) return;
@@ -62,6 +63,13 @@ export function useElementHeight(ref: React.RefObject<HTMLElement>): number | nu
     React.useLayoutEffect(() => set_height(ref.current?.getBoundingClientRect().height ?? null))
     useResizeObserver(ref, (entry) => set_height(entry.contentRect.height));
     return height;
+}
+
+export function useElementWidth(ref: React.RefObject<HTMLElement>): number | null {
+    const [width, set_width] = React.useState<number | null>(0);
+    React.useLayoutEffect(() => set_width(ref.current?.getBoundingClientRect().width ?? null))
+    useResizeObserver(ref, (entry) => set_width(entry.contentRect.width));
+    return width;
 }
 
 export function useRangeVirtual<T>(

@@ -63,6 +63,7 @@ export function ScrollBar({direction, value, setValue, valueMax, step, panRate, 
                 action={() => setValue(clamp(value - step))}
                 rate={panRate ?? 100}
                 refElem={v => refUp.current = v}
+                repeat
             />
             <div 
                 className="scrollbar-slide"
@@ -104,6 +105,7 @@ export function ScrollBar({direction, value, setValue, valueMax, step, panRate, 
                 action={() => setValue(clamp(value + step))}
                 rate={panRate ?? 100}
                 refElem={v => refDown.current = v}
+                repeat
             />
         </div>
     </div>;

@@ -1,11 +1,49 @@
 
+.layout-normal {
+    width:  100vw;
+    height: 100vh;
+    min-width:  100vw;
+    min-height: 100vh;
+    max-width:  100vw;
+    max-height: 100vh;
 
-
-main {
-    display: flex;
-    flex-direction: row;
+    display: grid; 
+    grid-template-columns: min-content 1fr 1fr 1fr; 
+    grid-template-rows:    min-content auto; 
+    gap: 1ch 1ch; 
+    grid-template-areas: 
+        "panel-card-image panel-database panel-deck-main panel-deck-side"
+        "panel-card-text panel-database panel-deck-main panel-deck-side";
 
     > * {
-        flex: 1 1 0;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
     }
+
+    .panel-deck-main      { grid-area: panel-deck-main;      }
+    .panel-deck-side      { grid-area: panel-deck-side;      }
+    .panel-database       { grid-area: panel-database;       }
+    .panel-deck-main, .panel-deck-side, .panel-database {
+        position: relative;
+        .list-cards{ 
+            position: absolute;
+            inset: 0;
+        }
+    }
+
+    .panel-card-image     { 
+        grid-area: panel-card-image;     
+        height: 100%; 
+    }
+
+    .panel-card-text      { 
+        grid-area: panel-card-text;     ;
+        min-width: 40ch;
+        font-size: 10pt;
+    }
+
+    .panel-deck-breakdown { 
+        grid-area: panel-deck-breakdown; }
 }

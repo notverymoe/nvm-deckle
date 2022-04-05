@@ -1,0 +1,36 @@
+
+.card-image {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    
+    .card-face-buttons {
+        width: 100%;
+    }
+
+    .card-shadowbox {
+        flex: 1 1;
+        background-color: rgba(0,0,0,0.2);
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        
+        height: 100%;
+        width: 100%;
+
+        .image {
+            height: 100%;
+            width: 100%;
+            background-position: center;
+            background-size: contain;
+            background-repeat: no-repeat;
+            image-rendering: optimizeQuality;
+        }
+    }
+
+}
