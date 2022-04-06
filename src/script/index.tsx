@@ -12,6 +12,8 @@ import { loadAtomicCards } from "api";
 import { ListCards       } from "deckyard/components/ListCards";
 import { CardDetails } from "deckyard/components/CardDetails";
 import { CardImage } from "deckyard/components/CardImage";
+import { CardRulings } from "deckyard/components/CardRulings";
+import { Card, CardDatabase } from "deckyard/types";
 
 (async function() {
     const rootElem = document.getElementById("app-root");
@@ -22,24 +24,36 @@ import { CardImage } from "deckyard/components/CardImage";
 
 
 function RenderPage() {
-    const [loaded, db] = useMemoAsync(loadAtomicCards);
+    const [,db] = useMemoAsync(loadAtomicCards);
+    const [selectedCard, setSelectedCard] = React.useState<Card | undefined>(undefined);
 
-    const [selected, setSelected] = React.useState(0);
 
     return <div className="layout-normal">
-        <div className="panel-database">
-            {!loaded && <>Loading...</>}
-            {db && <ListCards selected={selected} setSelected={setSelected} cards={db.cards}/>}
+        <div className="section-top">
+            <PanelCards database={db} onSelectionChanged={setSelectedCard}/>
+            <div className="panel-stats">Middle</div>
+            <PanelCards database={db} onSelectionChanged={setSelectedCard}/>
         </div>
-        <div className="panel-deck-main">
-            {!loaded && <>Loading...</>}
-            {db && <ListCards selected={selected} setSelected={setSelected} cards={db.cards}/>}
+        <div className="section-bottom">
+            <div className="panel-card-image"><CardImage card={selectedCard}/></div>
+            <div className="panel-card-text"><CardDetails card={selectedCard}/></div>
+            <div className="panel-card-rulings"><CardRulings card={selectedCard}/></div>
         </div>
-        <div className="panel-deck-side">
-            {!loaded && <>Loading...</>}
-            {db && <ListCards selected={selected} setSelected={setSelected} cards={db.cards}/>}
+    </div>;
+}
+
+function PanelCards({database, onSelectionChanged}: {
+    database?: CardDatabase,
+    onSelectionChanged?: (selection: Card | undefined) => void,
+}) {
+    const [selected, setSelected] = React.useState(0);
+    return <div className="panel-cards">
+        <div className="middle">Top</div>
+        <div className="panel-cards-inner">
+            {database && <ListCards selected={selected} setSelected={v => {
+                setSelected(v);
+                onSelectionChanged?.(database.cards[v]);
+            }} cards={database.cards}/> || "Loading..."}
         </div>
-        <div className="panel-card-image"><CardImage card={db?.cards[selected]}/></div>
-        <div className="panel-card-text"><CardDetails card={db?.cards[selected]}/></div>
     </div>;
 }

@@ -4,39 +4,61 @@ import * as React from "react";
 
 import { Card } from "deckyard/types";
 import { Button, ButtonGroup } from "components/button";
-import { useElementWidth, useMemoAsync } from "components/hooks";
+import { useElementHeight, useElementWidth, useMemoAsync } from "components/hooks";
 
-const imageRatio = 680/488;
+import ImageFrontLoading from "assets/cards/front-loading.webp";
+import ImageBack from "assets/cards/back.webp";
+import { joinClassNames } from "util/shared";
+
+const imageRatio = 488/680;
 
 
 export function CardImage({card}: {card?: Card}) {
+    const [flipped, setFlipped] = React.useState(false);
     const rootRef = React.useRef<HTMLDivElement | null>(null);
-    const [loading, image, error] = useScryfallImageAsync(card?.name);
-    const width = useElementWidth(rootRef);
-    return <div className="card-image">
-        <ButtonGroup className="card-face-buttons" direction="horizontal">
-            <Button text="Front"/>
-            <Button text="Back"/>
-        </ButtonGroup>
-        <div 
-            className="card-shadowbox"
-            ref={rootRef}
-            style={{
-                height: width ? width*imageRatio : undefined
-            }}
-        >
-            {!loading && <div>Loading...</div>}
-            {image   && <div className="image" style={{backgroundImage: `url(${image})`}}/>}
+    const [loadingFront, imageFront,] = useScryfallImageAsync(card?.name);
+    const [loadingBack,  imageBack, ] = useScryfallImageAsync(card?.name, true);
+    const height = useElementHeight(rootRef);
+    const cardID = React.useRef(2*((card?.id ?? -1) + 1));
+    React.useEffect(() => {
+        setFlipped(false);
+        cardID.current = 2*((card?.id ?? -1) + 1); // This is used to ensure we don't animate the flip-back
+    }, [card]);
+    return <div 
+        className={joinClassNames("card-image", flipped && "flipped")}
+        ref={rootRef}
+        onClick={() => setFlipped(!flipped)}
+        style={{
+            width: height ? height*imageRatio : undefined,
+            ["--card-height"]: `${height ?? 0}`,
+            ["--card-width" ]: `${height ? height*imageRatio : 0}`,
+        } as any}
+    >
+        <div className="card-image-inner">
+            {!loadingFront && !loadingBack && <div>Loading...</div>}
+            <div 
+                className="image"
+                key={cardID.current}
+                style={!card || !loadingFront ? {backgroundImage: `url(${ImageFrontLoading})`} : {backgroundImage: `url(${imageFront})`}}
+            />
+            <div 
+                className="image-back" 
+                key={cardID.current + 1}
+                style={!card || !loadingBack ? {backgroundImage: `url(${ImageFrontLoading})`} : {backgroundImage: `url(${imageBack ?? ImageBack})`}}
+            >{!loadingBack && "Loading..."}</div>
         </div>
     </div>;
 }
 
-function useScryfallImageAsync(id: string | undefined | null) {
+function useScryfallImageAsync(id: string | undefined | null, back?: boolean) {
     const [loading, blob, error] = useMemoAsync(async () => {
         if (!id) return undefined;
         // TODO proper stringify
-        const image = await makeScryfallRequest(`https://api.scryfall.com/cards/named?exact=${id.replaceAll(" ", "+")}&format=image&version=normal`, v => v.blob());
-        return URL.createObjectURL(image);
+        const image = await makeScryfallRequest(`https://api.scryfall.com/cards/named?exact=${id.replaceAll(" ", "+")}&format=image&version=normal&face=${back ? "back" : "front"}`, v => {
+            if (v.status === 422) return Promise.resolve(null);
+            return v.blob()
+        });
+        return image ? URL.createObjectURL(image) : null;
     }, [id]);
 
 

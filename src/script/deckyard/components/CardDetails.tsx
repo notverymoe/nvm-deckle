@@ -47,7 +47,6 @@ export function CardDetails({card} : {
 function CardFaceDetails({face}: {
     face: CardFace,
 }) {
-    const [showRulings, setShowRulings] = React.useState(false);
     return <div className="face-details">
         <div className="row-0">
             <div className="name">{face.name}</div>
@@ -57,15 +56,6 @@ function CardFaceDetails({face}: {
             <div className="type">{face.type}</div>
             {face.power && <div className="stats">{face.power}/{face.toughness}</div>}
         </div>
-        <Button action={() => setShowRulings(!showRulings)} text={showRulings ? "Show Text" : "Show Rulings"}/>
-        <div 
-            className={joinClassNames("face-content", !showRulings && "text", showRulings && "rulings")}
-        >{showRulings
-            ? <div  className="face-details">{face.rulings.map(v => <>
-                <div>{v.date}</div>
-                <div>{v.text}</div>
-            </>)}</div> 
-            : face.text ?? ""
-        }</div>
+        <div className="text">{face.text ?? ""}</div>
     </div>;
 }

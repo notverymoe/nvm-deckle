@@ -1,36 +1,58 @@
 
 .card-image {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+
+    display: grid;
+    grid-template-columns: 100%;
+    grid-template-rows:    100%;
+    
     height: 100%;
     width: 100%;
-    
-    .card-face-buttons {
-        width: 100%;
+    perspective: 1000px;
+    perspective-origin: 0 -100%;
+
+    overflow: hidden;
+    cursor: pointer;
+
+    .card-image-inner {
+        display: grid;
+        grid-template-columns: 100%;
+        grid-template-rows:    100%;
+        transition: 0.3s transform ease-in-out;
+        transform: scale(1);
+
     }
 
-    .card-shadowbox {
-        flex: 1 1;
-        background-color: rgba(0,0,0,0.2);
+    .image, .image-back {
+        grid-row: 1;
+        grid-column: 1;
 
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        
+        transform: rotate3d(var(--card-width), var(--card-height), 0, 0deg);
         height: 100%;
         width: 100%;
+        background-position: center;
+        background-size: contain;
+        background-repeat: no-repeat;
+        image-rendering: optimizeQuality;
+        
+        transition: 0.3s transform ease-in-out;
+        backface-visibility: hidden;
+        filter: blur(0.1px);
 
-        .image {
-            height: 100%;
-            width: 100%;
-            background-position: center;
-            background-size: contain;
-            background-repeat: no-repeat;
-            image-rendering: optimizeQuality;
-        }
+        border-radius: calc(var(--card-width)*0.05px);
+    }
+
+    .image-back {
+        transform: rotate3d(var(--card-width), var(--card-height), 0, -180deg);
+        filter: blur(0);
+    }
+
+    &:hover .card-image-inner {
+        transform: scale(0.95);
+    }
+    
+    &.flipped {
+        .image      { transform: rotate3d(var(--card-width), var(--card-height), 0, 180deg); }
+        .image-back { transform: rotate3d(var(--card-width), var(--card-height), 0,   0deg); }
     }
 
 }
