@@ -7,8 +7,6 @@
     
     height: 100%;
     width: 100%;
-    perspective: 1000px;
-    perspective-origin: 0 -100%;
 
     overflow: hidden;
     cursor: pointer;
@@ -17,8 +15,10 @@
         display: grid;
         grid-template-columns: 100%;
         grid-template-rows:    100%;
-        transition: 0.3s transform ease-in-out;
+        transition: 0.2s transform ease-in-out;
         transform: scale(1);
+        perspective: 1200px;
+        perspective-origin: 0 -100%;
 
     }
 
@@ -34,11 +34,11 @@
         background-repeat: no-repeat;
         image-rendering: optimizeQuality;
         
-        transition: 0.3s transform ease-in-out;
+        transition: 0.4s transform ease-in-out;
         backface-visibility: hidden;
         filter: blur(0.1px);
 
-        border-radius: calc(var(--card-width)*0.05px);
+        border-radius: calc(var(--card-width)*0.06px);
     }
 
     .image-back {

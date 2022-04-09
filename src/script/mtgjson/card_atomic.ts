@@ -26,7 +26,7 @@ export interface CardAtomic {
     power?: string,
     printings?: string[],
     purchaseUrls: PurchaseUrls,
-    rulings: Ruling[],
+    rulings?: Ruling[],
     side?: string,
     subtypes: string[],
     supertypes: string[],

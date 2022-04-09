@@ -19,14 +19,15 @@ export interface ButtonProps {
     refElem?: (v: HTMLButtonElement | null) => void,
 }
 
-export function ButtonGroup({className, direction, children}: {
+export function ButtonGroup({className, direction, children: childrenRaw}: {
     className?: string,
     direction: "vertical" | "horizontal",
     children?: React.ReactNode[],
 }) {
+    const children = childrenRaw?.filter(v => v != null);
     return <div 
         className={joinClassNames(`button-group ${direction}`, className)}
-    >{children?.flatMap(v => [v, <ButtonSpacer/>]).splice(0, children?.length*2-1)}</div>;
+    >{children?.flatMap((v, i) => [v, <ButtonSpacer key={children.length + i}/>]).splice(0, children?.length*2-1)}</div>;
 }
 
 export function Button({icon: Icon, text, title, action, rate, className, noCache, repeat, refElem, iconRotate}: ButtonProps) {

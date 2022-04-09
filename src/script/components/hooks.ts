@@ -58,6 +58,13 @@ export function useLast<T>(value: T, initial: T) {
     return last;
 }
 
+export function useElementSize<T>(ref: React.RefObject<HTMLElement>, cb: (v: HTMLElement) => (T | null)) {
+    const [state, setState] = React.useState<T | null>(null);
+    React.useLayoutEffect(() => setState(ref?.current ? cb(ref.current!) : null), [ref.current]);
+    useResizeObserver(ref, (entry) => setState(cb(entry.target as HTMLElement)));
+    return state;
+}
+
 export function useElementHeight(ref: React.RefObject<HTMLElement>): number | null {
     const [height, set_height] = React.useState<number | null>(0);
     React.useLayoutEffect(() => set_height(ref.current?.getBoundingClientRect().height ?? null))
@@ -81,11 +88,15 @@ export function useRangeVirtual<T>(
 ): T[] {
     const result = React.useRef<T[]>([]);
 
-    const currentDeps = [index, count, limit, ...(deps ?? [])];
-    const lastDeps    = React.useRef<any[]>([0, 0]);
+    const currentDeps = [[index, count, limit], (deps ?? [])];
+    const lastDeps    = React.useRef<any[]>([[0, 0, undefined], []]);
 
-    if(areDepsDifferent(currentDeps, lastDeps.current)) {
-        const oldStart: number = lastDeps.current[0];
+    if (areDepsDifferent(currentDeps[1], lastDeps.current[1])) {
+        let end = limit == null ? index + count : Math.min(limit, index + count);
+        lastDeps.current = currentDeps;
+        result.current = callback(index, end - index);
+    } else if(areDepsDifferent(currentDeps[0], lastDeps.current[0])) {
+        const oldStart: number = lastDeps.current[0][0];
         const oldEnd:   number = oldStart + result.current.length;
 
         let start = index; 

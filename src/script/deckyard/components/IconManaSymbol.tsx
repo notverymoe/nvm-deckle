@@ -101,13 +101,16 @@ function CardSymbol({
     const markless = !symbol && !text;
     let Icon = symbol ?? (() => <></>);
 
-    return <div className="card-symbol-root">
+    // TODO prevent default on mouse down.... but not block focus?
+    return <div
+        className="card-symbol-root"
+    >
         <div className={joinClassNames("card-symbol-background", colours[0], colours.length > 1 ? "dual" : "mono", markless && "markless", !markless && "marked")}>
             <div className={joinClassNames("card-symbol-left",  colours[0])}/>
             <div className={joinClassNames("card-symbol-right", colours[1] ?? colours[0])}/>
         </div>
-        <div className="card-symbol-text">{text}</div>
-        <Icon className="card-symbol-icon" onSelect={e => e.preventDefault()}/>
+        <div  className="card-symbol-text" >{text}</div>
+        <Icon className="card-symbol-icon"/>
     </div>
 
 }

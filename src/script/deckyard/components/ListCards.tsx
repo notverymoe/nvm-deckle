@@ -4,28 +4,27 @@ import "./ListCards.scss";
 import * as React from "react";
 
 import { useDeferredAction, useRangeVirtual } from "components/hooks";
-import { VList } from "components/vlist";
-import { createContext, useContext, useEffect, useLayoutEffect, useState } from "react";
-import { fromRange, isElementOrChildOf, joinClassNames } from "util/shared";
-import { Card } from "deckyard/types";
-import { IconCardType } from "./IconCardType";
+import { VList                              } from "components/vlist";
+import { isElementOrChildOf, joinClassNames } from "util/shared";
+import { DatabaseContext } from "../state";
+import { Card            } from "../types";
+import { IconCardType    } from "./IconCardType";
 import { IconManaCostSet } from "./IconManaSymbol";
 
-const selectionContext = createContext<{selected: number, setSelected: (idx: number) => void} | null>(null);;
+const selectionContext = React.createContext<{selected: number, setSelected: (idx: number) => void} | null>(null);;
 
-export function ListCards({cards, selected, setSelected}: {
+export function ListCards({selected, setSelected}: {
     selected:    number,
     setSelected: (v: number) => void,
-    cards:       Card[],
 }) {
-    const [offset,    setOffsetRaw] = useState(0);
-    const [offsetMax, setOffsetMax] = useState(0);
+    const [offset,    setOffsetRaw] = React.useState(0);
+    const [offsetMax, setOffsetMax] = React.useState(0);
     const setOffset = (v: number) => setOffsetRaw(Math.max(0, Math.min(offsetMax, Math.trunc(v))));
 
-    const [count,    setCount   ] = useState(0);
-    const [countVis, setCountVis] = useState(0);
+    const [count,    setCount   ] = React.useState(0);
+    const [countVis, setCountVis] = React.useState(0);
 
-    useLayoutEffect(() => {
+    React.useLayoutEffect(() => {
         // TODO we can limit this to animation frames, maybe?
         if (selected < offset) {
             setOffset(Math.max(0, selected));
@@ -35,7 +34,6 @@ export function ListCards({cards, selected, setSelected}: {
     }, [selected]);
 
     return <ListCardInner 
-        cards={cards} 
         selected={selected} 
         setSelected={setSelected} 
         count={count}
@@ -44,13 +42,16 @@ export function ListCards({cards, selected, setSelected}: {
         setCount={setCount}
         setCountVis={setCountVis}
         setOffsetMax={setOffsetMax}
-    />;;
+    />;
 }
 
-function ListCardInner({cards, selected, setSelected, count, offset, setOffset, setCount, setCountVis, setOffsetMax}: {
+// TODO resize not triggering update of range virtual?
+// TODO seperate deck and database...
+// TODO deck efficiency (do we need a vlist?)
+
+function ListCardInner({selected, setSelected, count, offset, setOffset, setCount, setCountVis, setOffsetMax}: {
     selected:    number,
     setSelected: (v: number) => void,
-    cards:       Card[],
     count: number,
     offset: number,
     setOffset:     (v: number) => void,
@@ -58,11 +59,12 @@ function ListCardInner({cards, selected, setSelected, count, offset, setOffset, 
     setCountVis?:  (v: number) => void,
     setOffsetMax?: (v: number) => void,
 }) {
-    const [hasFocus, setHasFocus] = useState(false);
+    const [hasFocus, setHasFocus] = React.useState(false);
+    const cards = React.useContext(DatabaseContext)?.cards ?? [];
 
-    const cardsShown = useRangeVirtual((i, length) => cards.slice(i, i+length).map((v, j) => v
-        ? <ListCardEntry key={i+j} card={v}/>
-        : <div key={i+j}/>
+    const cardsShown = useRangeVirtual((i, length) => cards
+        .slice(i, i+length)
+        .map((v, j) => v ? <ListCardEntry key={i+j} card={v}/> : <div key={i+j}/>
     ), offset, count, undefined, [cards]);
 
     // TODO move scroll & focus logic to a lower level...
@@ -92,10 +94,13 @@ function ListCardInner({cards, selected, setSelected, count, offset, setOffset, 
                     const arrowDown = e.code === "ArrowDown";
                     const arrowUp   = e.code === "ArrowUp";
                     const tab       = e.code === "Tab";
-
                     if (!arrowDown && !arrowUp && !tab) return;
-                    e.preventDefault();
-                    scrollToSelection(tab ? (e.shiftKey ? -1 : 1) : (arrowUp ? -1 : 1));
+
+                    const step = tab ? (e.shiftKey ? -1 : 1) : (arrowUp ? -1 : 1);
+                    if ((step < 0 && selected > 0) || (step > 0 && selected+1 < cards.length)) {
+                        e.preventDefault();
+                        scrollToSelection(step);
+                    }
                 },
             }}
             tabIndex={0}
@@ -103,14 +108,16 @@ function ListCardInner({cards, selected, setSelected, count, offset, setOffset, 
     </selectionContext.Provider>;
 }
 
-export function ListCardEntry({card}: {card: Card}) {
-    const selection = useContext(selectionContext);
+export function ListCardEntry({qty, card}: {qty?: number, card: Card}) {
+    const selection = React.useContext(selectionContext);
 
+    // TODO prevent default on mouse down.... but not block focus?
     return <div 
         className={joinClassNames("card-entry", (selection?.selected === card.id) && "selected")} 
         onClick={() => selection?.setSelected(card.id)} 
         title={card.name}
     >
+        {qty && <div className="card-qty" title={`x${qty}`}>{qty}</div>}
         <div className="card-type"><IconCardType card={card}/></div>
         <div className="card-name">{card.name}</div>
         <div className="card-cost"><IconManaCostSet costs={card.faces.map(v => v.manaCost)}/></div>

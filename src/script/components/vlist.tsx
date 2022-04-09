@@ -4,6 +4,8 @@ import * as React from "react";
 import { useCallback, useEffect, useState } from "react";
 import { ScrollBar } from "./scrollbar";
 import { joinClassNames } from "util/shared";
+import { useElementHeight, useElementSize } from "./hooks";
+import { useRef } from "react";
 
 export function VList({length, offset, setOffset, setCount, setCountVis, setOffsetMax, lines: linesRaw, children, className, events, eventsContent: evenstContent, refElem, tabIndex}: {
     length: number,
@@ -20,11 +22,14 @@ export function VList({length, offset, setOffset, setCount, setCountVis, setOffs
     refElem?: (v: HTMLDivElement | null) => void,
     tabIndex?: number,
 }) {
-    const lines = linesRaw ?? 1;
-    const [refContent,     setRefContent    ] = useState<HTMLDivElement | null>(null);
-    const [refContentSize, setRefContentSize] = useState<HTMLDivElement | null>(null);
+    const lines = linesRaw ?? 1; 
+    const refContent     = useRef<HTMLDivElement | null>(null);
+    const refContentSize = useRef<HTMLDivElement | null>(null);
 
-    const countRaw  = refContent && refContentSize && (refContent.clientHeight/refContentSize.offsetHeight) || 1;
+    const contentHeight    = useElementSize<number>(refContent,     v => v.clientHeight) ?? 0;
+    const contentRowHeight = useElementSize<number>(refContentSize, v => v.offsetHeight) ?? 0;
+
+    const countRaw  = (contentHeight && contentRowHeight && contentHeight/contentRowHeight) || 1;
     const countDisp = Math.ceil(countRaw);
     const countReal = Math.floor(countRaw);
     const offsetMax = length - countReal;
@@ -39,14 +44,14 @@ export function VList({length, offset, setOffset, setCount, setCountVis, setOffs
         <div
             {...evenstContent}
             className="vlist-content" 
-            ref={setRefContent} 
-            style={{"--entry-height": `${refContentSize?.clientHeight ?? 0}px`} as any}
+            ref={refContent} 
+            style={{"--entry-height": `${contentRowHeight}px`} as any}
             onWheel={e => setOffset(offset + Math.sign(e.deltaY))}
             tabIndex={tabIndex}
         >
             <div 
                 className="vlist-content-scaler"
-                ref={setRefContentSize}
+                ref={refContentSize}
             >{Array.from({length: lines}, () => ".").join("\n")}</div>
             {children}
         </div>

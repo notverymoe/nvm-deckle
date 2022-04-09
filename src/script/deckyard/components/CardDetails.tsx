@@ -2,13 +2,11 @@ import "./CardDetails.scss";
 
 import * as React from "react";
 
-import { CardFace, Card } from "deckyard/types/database";
+import { CardFace, Card } from "deckyard/types";
 import { ButtonGroup, Button } from "components/button";
 import { Layout } from "deckyard/types/card_layout";
 import { IconManaCost } from "./IconManaSymbol";
-import { useMemoAsync } from "components/hooks";
-import { joinClassNames } from "util/shared";
-import { CardImage } from "./CardImage";
+import { CardRulings } from "./CardRulings";
 
 const layouts: Partial<Record<Layout, string[]>> = {
     [Layout.Normal    ]: ["Front"               ],
@@ -34,19 +32,32 @@ const layouts: Partial<Record<Layout, string[]>> = {
 export function CardDetails({card} : {
     card?: Card
 }) {
+    // TODO disable rulings button
     const [selected, setSelected] = React.useState(0);
     const layout = layouts[card?.layout!] ?? card?.faces.map((_, i) => `Part ${i}`) ?? ["None"];
+    React.useLayoutEffect(() => {
+        setSelected(0);
+    }, [card]);
     return card ?<div className="card-details">
-        <CardFaceDetails face={card.faces[selected]}/>
-        <ButtonGroup direction="horizontal" className="card-face-buttons">
-            {layout.map((v, i) => <Button text={v} action={() => setSelected(i)}/>)}
-        </ButtonGroup>
+        <div className="card-page">
+            {selected >= 0 && <CardFaceDetails face={card.faces[selected]}/>}
+            {selected <  0 && <CardRulings card={card}/>}
+        </div>
+        <div className="card-buttons">
+            <ButtonGroup direction="vertical" className="card-face-buttons">
+                {layout.map((v, i) => <Button key={i} text={v} action={() => setSelected(i)}/>)}
+            </ButtonGroup>
+            {card.rulings.length > 0 && <Button className="card-button-rulings" text={"Rulings"} action={() => setSelected(-1)}/>}
+        </div>
     </div> : <></>;
 }
 
 function CardFaceDetails({face}: {
     face: CardFace,
 }) {
+
+    const text = React.useMemo(() => (face.text ?? "").split('\n').map((v,i) => <p key={i}>{v}</p>), [face.text ?? ""]);
+
     return <div className="face-details">
         <div className="row-0">
             <div className="name">{face.name}</div>
@@ -56,6 +67,6 @@ function CardFaceDetails({face}: {
             <div className="type">{face.type}</div>
             {face.power && <div className="stats">{face.power}/{face.toughness}</div>}
         </div>
-        <div className="text">{face.text ?? ""}</div>
+        <div className="text">{text}</div>
     </div>;
 }
