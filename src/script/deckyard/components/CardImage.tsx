@@ -48,7 +48,7 @@ export function CardImage({card}: {card?: Card}) {
 }
 
 function useScryfallImageAsync(id: string | undefined | null, back?: boolean) {
-    //return [false, null, null];
+    return [false, null, null];
     const [loading, blob, error] = useMemoAsync(async () => {
         if (!id) return undefined;
         // TODO proper stringify

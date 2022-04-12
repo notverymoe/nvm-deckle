@@ -17,8 +17,13 @@
         color: var(--fg-input-1);
     }
 
-    &:focus { 
+    &:focus, &.selected { 
         outline: none; 
         box-shadow: inset 0 0 0 1px var(--accent-1);
+    }
+
+    &:disabled {
+        background-color: var(--bg-input-0);
+        color: var(--fg-input-0);
     }
 }

@@ -33,8 +33,8 @@ function RenderPage() {
                 <PanelCards database={db} onSelectionChanged={setSelectedCard}/>
             </div>
             <div className="section-bottom">
-                <div className="panel-card-image"  ><CardImage   card={selectedCard}/></div>
-                <div className="panel-card-text"   ><CardDetails card={selectedCard}/></div>
+                <div className="panel-card-image"><CardImage   card={selectedCard}/></div>
+                <div className="panel-card-text" ><CardDetails card={selectedCard}/></div>
             </div>
         </div>
     </DatabaseContext.Provider>;
