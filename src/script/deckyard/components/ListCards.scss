@@ -4,6 +4,7 @@
     .vlist-content {
         border-radius: 0.5em 0 0 0.25em;
         background-color: var(--bg-panel-3);
+        box-shadow: inset black 0 0 4px 1px;
 
         .card-entry {
             &:nth-child(2) {
@@ -74,7 +75,7 @@
     
     &.focused {
         .vlist-content {
-            box-shadow: inset 0 0 0 1px var(--accent-1);
+            box-shadow: inset 0 0 0 1px var(--accent-1), inset black 0 0 6px 2px;
 
             .card-entry.selected {
                 box-shadow: inset 0 0 0 1px var(--accent-1), 0 0 4px 1px black;

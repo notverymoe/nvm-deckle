@@ -8,10 +8,12 @@ import { useElementHeight, useMemoAsync } from "components/hooks";
 import ImageFrontLoading from "assets/cards/front-loading.webp";
 import ImageBack from "assets/cards/back.webp";
 import { joinClassNames } from "util/shared";
+import { Button, ButtonGroup } from "components/button";
 
 const imageRatio = 488/680;
 
 export function CardImage({card}: {card?: Card}) {
+    const [rotation, setRotation] = React.useState(0);
     const [flipped, setFlipped] = React.useState(false);
     const rootRef = React.useRef<HTMLDivElement | null>(null);
     const [loadingFront, imageFront,] = useScryfallImageAsync(card?.name);
@@ -22,33 +24,44 @@ export function CardImage({card}: {card?: Card}) {
         setFlipped(false);
         cardID.current = 2*((card?.id ?? -1) + 1); // This is used to ensure we don't animate the flip-back
     }, [card]);
-    return <div 
-        className={joinClassNames("card-image", flipped && "flipped")}
+    return <div
+        className="card-image-container"
         ref={rootRef}
-        onClick={() => setFlipped(!flipped)}
-        style={{
-            width: height ? height*imageRatio : undefined,
-            ["--card-height"]: `${height ?? 0}`,
-            ["--card-width" ]: `${height ? height*imageRatio : 0}`,
-        } as any}
     >
-        <div className="card-image-inner">
+        <div className="card-image-backdrop"> 
             <div 
-                className="image"
-                key={cardID.current}
-                style={!card || !loadingFront ? {backgroundImage: `url(${ImageFrontLoading})`} : {backgroundImage: `url(${imageFront})`}}
-            />
-            <div 
-                className="image-back" 
-                key={cardID.current + 1}
-                style={!card || !loadingBack ? {backgroundImage: `url(${ImageFrontLoading})`} : {backgroundImage: `url(${imageBack ?? ImageBack})`}}
-            />
+                className={joinClassNames("card-image", flipped && "flipped")}
+                onClick={() => setFlipped(!flipped)}
+                style={{
+                    width: height ? height*imageRatio : undefined,
+                    transform: `rotate(${rotation}deg)`,
+                    ["--card-height"]: `${height ?? 0}`,
+                    ["--card-width" ]: `${height ? height*imageRatio : 0}`,
+                } as any}
+            >
+                <div className="card-image-inner">
+                    <div 
+                        className="image"
+                        key={cardID.current}
+                        style={!card || !loadingFront ? {backgroundImage: `url(${ImageFrontLoading})`} : {backgroundImage: `url(${imageFront})`}}
+                    />
+                    <div 
+                        className="image-back" 
+                        key={cardID.current + 1}
+                        style={!card || !loadingBack ? {backgroundImage: `url(${ImageFrontLoading})`} : {backgroundImage: `url(${imageBack ?? ImageBack})`}}
+                    />
+                </div>
+            </div>
         </div>
+        <ButtonGroup direction="horizontal" className="rotate-button">
+            <Button text="CCW" action={() => setRotation(rotation - 90)}/>
+            <Button text="CW"  action={() => setRotation(rotation + 90)}/>
+        </ButtonGroup>
     </div>;
 }
 
 function useScryfallImageAsync(id: string | undefined | null, back?: boolean) {
-    return [false, null, null];
+    //return [false, null, null];
     const [loading, blob, error] = useMemoAsync(async () => {
         if (!id) return undefined;
         // TODO proper stringify

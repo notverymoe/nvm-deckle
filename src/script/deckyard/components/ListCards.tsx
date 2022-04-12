@@ -11,11 +11,12 @@ import { Card            } from "../types";
 import { IconCardType    } from "./IconCardType";
 import { IconManaCostSet } from "./IconManaSymbol";
 
-const selectionContext = React.createContext<{selected: number, setSelected: (idx: number) => void} | null>(null);;
+const selectionContext = React.createContext<{selected: number, setSelected: (idx: number, card: Card) => void} | null>(null);;
 
-export function ListCards({selected, setSelected}: {
+export function ListCards({className, selected, setSelected}: {
+    className?:  string,
     selected:    number,
-    setSelected: (v: number) => void,
+    setSelected: (v: number, c: Card) => void,
 }) {
     const [offset,    setOffsetRaw] = React.useState(0);
     const [offsetMax, setOffsetMax] = React.useState(0);
@@ -49,9 +50,10 @@ export function ListCards({selected, setSelected}: {
 // TODO seperate deck and database...
 // TODO deck efficiency (do we need a vlist?)
 
-function ListCardInner({selected, setSelected, count, offset, setOffset, setCount, setCountVis, setOffsetMax}: {
+function ListCardInner({className, selected, setSelected, count, offset, setOffset, setCount, setCountVis, setOffsetMax}: {
+    className?:  string,
     selected:    number,
-    setSelected: (v: number) => void,
+    setSelected: (v: number, c: Card) => void,
     count: number,
     offset: number,
     setOffset:     (v: number) => void,
@@ -64,12 +66,15 @@ function ListCardInner({selected, setSelected, count, offset, setOffset, setCoun
 
     const cardsShown = useRangeVirtual((i, length) => cards
         .slice(i, i+length)
-        .map((v, j) => v ? <ListCardEntry key={i+j} card={v}/> : <div key={i+j}/>
+        .map((v, j) => v ? <ListCardEntry key={i+j} idx={i+j} card={v}/> : <div key={i+j}/>
     ), offset, count, undefined, [cards]);
 
     // TODO move scroll & focus logic to a lower level...
     const scrollToSelection = useDeferredAction(
-        (step) => setSelected(Math.min(cards.length-1, Math.max(0, selected + step))), 
+        (step) => {
+            const newSelection = Math.min(cards.length-1, Math.max(0, selected + step));
+            setSelected(newSelection, cards[newSelection]);
+        }, 
         8
     );
 
@@ -82,7 +87,7 @@ function ListCardInner({selected, setSelected, count, offset, setOffset, setCoun
             setCount={setCount}
             setCountVis={setCountVis}
             setOffsetMax={setOffsetMax}
-            className={joinClassNames("list-cards", hasFocus && "focused", !hasFocus && "unfocused")}
+            className={joinClassNames("list-cards", hasFocus && "focused", !hasFocus && "unfocused", className)}
             eventsContent={{
                 onFocus: () => setHasFocus(true),
                 onBlur:  e => {
@@ -108,13 +113,13 @@ function ListCardInner({selected, setSelected, count, offset, setOffset, setCoun
     </selectionContext.Provider>;
 }
 
-export function ListCardEntry({qty, card}: {qty?: number, card: Card}) {
+export function ListCardEntry({qty, idx, card}: {qty?: number, card: Card, idx: number}) {
     const selection = React.useContext(selectionContext);
 
     // TODO prevent default on mouse down.... but not block focus?
     return <div 
-        className={joinClassNames("card-entry", (selection?.selected === card.id) && "selected")} 
-        onClick={() => selection?.setSelected(card.id)} 
+        className={joinClassNames("card-entry", (selection?.selected === idx) && "selected")} 
+        onClick={() => selection?.setSelected(idx, card)} 
         title={card.name}
     >
         {qty && <div className="card-qty" title={`x${qty}`}>{qty}</div>}

@@ -1,5 +1,6 @@
 @use "sass:color";
 
+$base-04: #001f27;
 $base-03: #002b36;
 $base-02: #073642;
 $base-01: #586e75;
@@ -26,6 +27,7 @@ $input-01: color.adjust($accent-0, $blackness: 40%);
 $input-00: color.adjust($accent-0, $blackness: 45%);
 
 html {
+    --bg-panel-4: #{$base-04};
     --bg-panel-3: #{$base-03};
     --bg-panel-2: #{$base-02};
     --bg-panel-1: #{$base-01};
@@ -58,9 +60,8 @@ body {
 }
 
 html, body, main {
-    width: 100vw;
-    height: 100vh;
-    //overflow: hidden;
+    position: absolute;
+    inset: 0;;
     margin: 0;
     padding: 0;
     border: 0;

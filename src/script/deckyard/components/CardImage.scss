@@ -1,58 +1,103 @@
 
-.card-image {
-
-    display: grid;
-    grid-template-columns: 100%;
-    grid-template-rows:    100%;
-    
-    height: 100%;
+.card-image-container {
+    position: relative;
+    display: flex;
     width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
 
-    overflow: hidden;
-    cursor: pointer;
+    .rotate-button {
+        position: absolute;
+        bottom: 0.25em;
+        right:  0.25em;
 
-    .card-image-inner {
+        opacity: 0.2;
+        &:hover {
+            opacity: 1.0;
+        }
+
+        .button {
+            width:  2.5em;
+            height: 1.5em;
+        }
+
+    }
+
+    .card-image-backdrop {
+        flex: 1 1;
+        overflow: hidden;
+
+        display: flex;
+        width: 100%;
+        height: 100%;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+
+        background-color: var(--bg-panel-4);
+        box-shadow: inset black 0 0 6px 2px;
+        border-radius: 0.5em;
+    }
+
+    .card-image {
         display: grid;
         grid-template-columns: 100%;
         grid-template-rows:    100%;
-        transition: 0.2s transform ease-in-out;
-        transform: scale(1);
-        perspective: 1200px;
-        perspective-origin: 0 -100%;
-
-    }
-
-    .image, .image-back {
-        grid-row: 1;
-        grid-column: 1;
-
-        transform: rotate3d(var(--card-width), var(--card-height), 0, 0deg);
+        
         height: 100%;
         width: 100%;
-        background-position: center;
-        background-size: contain;
-        background-repeat: no-repeat;
-        image-rendering: optimizeQuality;
-        
-        transition: 0.4s transform ease-in-out;
-        backface-visibility: hidden;
-        filter: blur(0.1px);
-
-        border-radius: calc(var(--card-width)*0.06px);
-    }
-
-    .image-back {
-        transform: rotate3d(var(--card-width), var(--card-height), 0, -180deg);
-        filter: blur(0);
-    }
-
-    &:hover .card-image-inner {
-        transform: scale(0.95);
-    }
     
-    &.flipped {
-        .image      { transform: rotate3d(var(--card-width), var(--card-height), 0, 180deg); }
-        .image-back { transform: rotate3d(var(--card-width), var(--card-height), 0,   0deg); }
-    }
+        cursor: pointer;
 
+        transform: rotate(0deg);
+        transition: 0.2s transform ease-in-out;
+
+        .card-image-inner {
+            position: relative;
+            
+            transition: 0.2s transform ease-in-out;
+            transform: scale(1);
+            perspective: 1200px;
+            perspective-origin: 0 -100%;
+    
+        }
+    
+        .image, .image-back {
+            position: absolute;
+            inset: 0;
+        
+            height: 100%;
+            width: 100%;
+            background-position: center;
+            background-size: contain;
+            background-repeat: no-repeat;
+            image-rendering: optimizeQuality;
+            
+            transition: 0.4s transform ease-in-out;
+            backface-visibility: hidden;
+            filter: blur(0.1px);
+    
+            border-radius: calc(var(--card-height)*0.06px);
+        }
+
+        .image {
+            transform: rotate3d(var(--card-width), var(--card-height), 0, 0deg);
+        }
+    
+        .image-back {
+            transform: rotate3d(var(--card-width), var(--card-height), 0, -180deg);
+            filter: blur(0);
+        }
+    
+        &:hover .card-image-inner {
+            transform: scale(0.95);
+        }
+        
+        &.flipped {
+            .image      { transform: rotate3d(var(--card-width), var(--card-height), 0, 180deg); }
+            .image-back { transform: rotate3d(var(--card-width), var(--card-height), 0,   0deg); }
+        }
+    }
 }

@@ -8,50 +8,51 @@ import { createRoot } from "react-dom/client";
 import { useMemoAsync    } from "components/hooks";
 import { loadAtomicCards } from "api";
 import { ListCards       } from "deckyard/components/ListCards";
-import { CardDetails } from "deckyard/components/CardDetails";
-import { CardImage } from "deckyard/components/CardImage";
-import { CardRulings } from "deckyard/components/CardRulings";
-import { Card, CardDatabase } from "deckyard/types";
+import { CardFaceButtons, CardFaceDetails } from "deckyard/components/CardDetails";
+import { CardImage       } from "deckyard/components/CardImage";
+import { Card            } from "deckyard/types";
 import { DatabaseContext } from "deckyard/state";
+import { joinClassNames } from "util/shared";
+import { CardRulings } from "deckyard/components/CardRulings";
 
 (async function() {
     const rootElem = document.getElementById("app-root");
     if (!rootElem) return;
     const root = createRoot(rootElem);    
-    root.render(<RenderPage/>);
+    root.render(<RenderViewerPage/>);
 })();
 
-function RenderPage() {
+function RenderViewerPage() {
     const [,db] = useMemoAsync(loadAtomicCards);
-    const [selectedCard, setSelectedCard] = React.useState<Card | undefined>(undefined);
-
     return <DatabaseContext.Provider value={db}>
-        <div className="layout-normal">
-            <div className="section-top">
-                <PanelCards database={db} onSelectionChanged={setSelectedCard}/>
-                <div className="panel-stats">Middle</div>
-                <PanelCards database={db} onSelectionChanged={setSelectedCard}/>
-            </div>
-            <div className="section-bottom">
-                <div className="panel-card-image"><CardImage   card={selectedCard}/></div>
-                <div className="panel-card-text" ><CardDetails card={selectedCard}/></div>
-            </div>
-        </div>
+        <PanelCardViewer/>
+        <PanelCardViewer/>
     </DatabaseContext.Provider>;
 }
 
-function PanelCards({database, onSelectionChanged}: {
-    database?: CardDatabase,
-    onSelectionChanged?: (selection: Card | undefined) => void,
+function PanelCardViewer({className}: {
+    className?: string,
 }) {
-    const [selected, setSelected] = React.useState(0);
-    return <div className="panel-cards">
-        <div className="middle">Top</div>
-        <div className="panel-cards-inner">
-            {database && <ListCards selected={selected} setSelected={v => {
-                setSelected(v);
-                onSelectionChanged?.(database.cards[v]);
-            }}/> || "Loading..."}
+    const [[selected, selectedCard, faceIndex], setSelected] = React.useState<[number, Card | undefined, number]>([-1, undefined, 0]);
+
+    return <div className={joinClassNames("panel-card-viewer-container", className)}>
+        <div className="panel-card-viewer">
+            <div className="tools">Top</div>
+            <ListCards selected={selected} setSelected={(id, card) => setSelected([id, card, faceIndex <= -2 ? -2 : 0])}/>
+            <div className="preview">
+                <div className="details">{
+                    faceIndex <= -2
+                        ? <CardImage card={selectedCard}/>
+                        : faceIndex <= -1 
+                            ? <CardRulings card={selectedCard}/>
+                            : <CardFaceDetails face={selectedCard?.faces[faceIndex]}/>
+                }
+                </div>
+                <div className="buttons">
+                    <CardFaceButtons card={selectedCard} selectedFace={faceIndex} setSelectedFace={v => setSelected([selected, selectedCard, v])}/>
+                </div>
+            </div>
         </div>
     </div>;
+
 }
