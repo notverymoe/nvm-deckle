@@ -2,7 +2,7 @@ import "./CardImage.scss";
 
 import * as React from "react";
 
-import { Card } from "deckyard/types";
+import { Card, Layout } from "deckyard/types";
 import { useElementHeight, useMemoAsync } from "components/hooks";
 
 import ImageFrontLoading from "assets/cards/front-loading.webp";
@@ -13,17 +13,19 @@ import { Button, ButtonGroup } from "components/button";
 const imageRatio = 488/680;
 
 export function CardImage({card}: {card?: Card}) {
-    const [rotation, setRotation] = React.useState(0);
+    const [rotationRaw, setRotationRaw] = React.useState(0);
+    const rotation = React.useRef(rotationRaw); // TODO default rotation for split cards
+    const applyRotation = (v: number) => {
+        setRotationRaw(rotation.current += v);
+    };
+
     const [flipped, setFlipped] = React.useState(false);
     const rootRef = React.useRef<HTMLDivElement | null>(null);
     const [loadingFront, imageFront,] = useScryfallImageAsync(card?.name);
-    const [loadingBack,  imageBack, ] = useScryfallImageAsync(card?.name, true);
+
+    // TODO more robust card detection
+    const [loadingBack,  imageBack, ] = useScryfallImageAsync(card?.name, true, card?.layout == Layout.Normal);
     const height = useElementHeight(rootRef);
-    const cardID = React.useRef(2*((card?.id ?? -1) + 1));
-    React.useLayoutEffect(() => {
-        setFlipped(false);
-        cardID.current = 2*((card?.id ?? -1) + 1); // This is used to ensure we don't animate the flip-back
-    }, [card]);
     return <div
         className="card-image-container"
         ref={rootRef}
@@ -33,8 +35,9 @@ export function CardImage({card}: {card?: Card}) {
                 className={joinClassNames("card-image", flipped && "flipped")}
                 onClick={() => setFlipped(!flipped)}
                 style={{
-                    width: height ? height*imageRatio : undefined,
-                    transform: `rotate(${rotation}deg)`,
+                    transform: `rotate(${rotation.current}deg)`,
+                    width: height ? `${height*imageRatio}px` : undefined,
+                    height: height ?? undefined,
                     ["--card-height"]: `${height ?? 0}`,
                     ["--card-width" ]: `${height ? height*imageRatio : 0}`,
                 } as any}
@@ -42,28 +45,30 @@ export function CardImage({card}: {card?: Card}) {
                 <div className="card-image-inner">
                     <div 
                         className="image"
-                        key={cardID.current}
-                        style={!card || !loadingFront ? {backgroundImage: `url(${ImageFrontLoading})`} : {backgroundImage: `url(${imageFront})`}}
+                        style={{
+                            backgroundImage: !card || !loadingFront ? `url(${ImageFrontLoading})` : `url(${imageFront})`,
+                        }}
                     />
                     <div 
                         className="image-back" 
-                        key={cardID.current + 1}
-                        style={!card || !loadingBack ? {backgroundImage: `url(${ImageFrontLoading})`} : {backgroundImage: `url(${imageBack ?? ImageBack})`}}
+                        style={{
+                            backgroundImage: !card || !loadingBack ? `url(${ImageFrontLoading})` : `url(${imageBack ?? ImageBack})`,
+                        }}
                     />
                 </div>
             </div>
         </div>
         <ButtonGroup direction="horizontal" className="rotate-button">
-            <Button text="CCW" action={() => setRotation(rotation - 90)}/>
-            <Button text="CW"  action={() => setRotation(rotation + 90)}/>
+            <Button text="CCW" action={() => applyRotation(-90)}/>
+            <Button text="CW"  action={() => applyRotation(+90)}/>
         </ButtonGroup>
     </div>;
 }
 
-function useScryfallImageAsync(id: string | undefined | null, back?: boolean) {
+function useScryfallImageAsync(id: string | undefined | null, back?: boolean, noBack?: boolean) {
     //return [false, null, null];
     const [loading, blob, error] = useMemoAsync(async () => {
-        if (!id) return undefined;
+        if (!id || noBack) return undefined;
         // TODO proper stringify
         // HACK "_____" only works in fuzzy search?
         const image = await makeScryfallRequest(

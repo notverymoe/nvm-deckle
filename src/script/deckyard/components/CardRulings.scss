@@ -3,7 +3,7 @@
 .card-rulings {
     display: grid;
 
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto;
     grid-auto-rows: min-content;
     grid-auto-flow: row;
 
@@ -12,37 +12,51 @@
     height: 100%;
     overflow-y: scroll;
     overflow-x: hidden;
-    gap: 0.25em 0.1em;
+
+    background-color: var(--bg-panel-4);
+    box-shadow: inset black 0 0 6px 2px;
+    border-radius: 0.5em;
+    padding: 0.35em;
 
     .date {
         color: var(--fg-panel-1);
         background-color: var(--bg-panel-1);
-        padding: 0.5em;
+        padding: 0.25em 0.5em;
         width: max-content;
-        font-size: 90%;
+        font-size: 80%;
+        border: 1px solid var(--bg-panel-4);
+        box-sizing: border-box;
 
         display: flex;
         align-items: center;
         justify-content: flex-end;
 
-        border-radius: 0.25em 0 0 0.25em;
+        border-radius: 0.5em 0.5em 0 0;
     }
 
     .text {
         color: var(--fg-panel-1);
         background-color: var(--bg-panel-1);
-        padding: 0.5em;
+        padding: 0.35em;
         line-height: 1.1;
         min-width: 0;
         word-break: break-word;
+        font-size: 90%;
+        border: 1px solid var(--bg-panel-4);
+        box-sizing: border-box;
 
         display: flex;
         align-items: center;
         justify-content: flex-start;
 
-        border-radius: 0 0.25em 0.25em 0;
+        margin-bottom: 0.5em;
+
+        border-radius: 0 0.5em 0.5em 0.5em;
     }
 
+    .no-rules {
+        padding: 0.25em;
+    }
 
     
 }

@@ -1,0 +1,16 @@
+<svg version="1.1" viewBox="0 0 488 680" xmlns="http://www.w3.org/2000/svg">
+ <g>
+  <rect x="-7.6294e-6" y="7.6294e-6" width="488" height="680" rx="12" ry="12"/>
+  <g fill="#002833">
+   <rect x="18.278" y="18.064" width="451.44" height="554.72" rx="8" ry="8"/>
+   <rect x="18.278" y="60.512" width="451.44" height="554.72" rx="63.6" ry="37.5"/>
+  </g>
+  <text x="459.48828" y="650.9873" font-family="'Roboto Condensed'" font-size="21.333px" style="line-height:1.25" xml:space="preserve"><tspan x="459.48828" y="650.9873" fill="#ffffff" font-family="serif" font-size="21.333px" text-align="end" text-anchor="end">Loading Imagery...</tspan></text>
+  <g>
+   <rect x="33.872" y="425.12" width="420.26" height="205.49" rx="1" ry="1" fill="#37758b" stroke="#235e70" stroke-linecap="square" stroke-linejoin="round" stroke-width="4"/>
+   <rect x="34.748" y="71.896" width="418.5" height="310.34" rx=".88608" ry=".88608" fill="#001f27"/>
+   <rect x="26.595" y="382.23" width="434.81" height="42.891" rx="8" ry="21.446" fill="#37758b" stroke="#235e70" stroke-linecap="square" stroke-linejoin="round" stroke-width="4"/>
+   <rect x="26.595" y="29.005" width="434.81" height="42.891" rx="8" ry="21.446" fill="#37758b" stroke="#235e70" stroke-linecap="square" stroke-linejoin="round" stroke-width="4"/>
+  </g>
+ </g>
+</svg>

@@ -10,6 +10,6 @@ export function CardRulings({card}: {card?: Card}) {
             <div key={i*2  } className="date">{v.date}</div>,
             <div key={i*2+1} className="text">{v.text}</div>
         ]) 
-        : <div>No rulings availiable</div>
+        : <div className="no-rules">No rulings availiable</div>
     }</div>
 }

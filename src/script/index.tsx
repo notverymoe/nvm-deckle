@@ -5,10 +5,10 @@ import "./index.scss";
 import * as React from "react";
 import { createRoot } from "react-dom/client";
 
-import { useMemoAsync    } from "components/hooks";
+import { useLast, useMemoAsync    } from "components/hooks";
 import { loadAtomicCards } from "api";
 import { ListCards       } from "deckyard/components/ListCards";
-import { CardFaceButtons, CardFaceDetails } from "deckyard/components/CardDetails";
+import { CardFaceButtons, CardFaceDetails, DetailMode } from "deckyard/components/CardDetails";
 import { CardImage       } from "deckyard/components/CardImage";
 import { Card            } from "deckyard/types";
 import { DatabaseContext } from "deckyard/state";
@@ -33,26 +33,53 @@ function RenderViewerPage() {
 function PanelCardViewer({className}: {
     className?: string,
 }) {
-    const [[selected, selectedCard, faceIndex], setSelected] = React.useState<[number, Card | undefined, number]>([-1, undefined, 0]);
+    const [selected,  setSelected ] = React.useState(-1);
+    const [selection, setSelection] = React.useState<Card | undefined>(undefined);
 
     return <div className={joinClassNames("panel-card-viewer-container", className)}>
         <div className="panel-card-viewer">
             <div className="tools">Top</div>
-            <ListCards selected={selected} setSelected={(id, card) => setSelected([id, card, faceIndex <= -2 ? -2 : 0])}/>
+            <ListCards
+                selected={selected} 
+                setSelected={(id, card) => {
+                    setSelected(id);
+                    setSelection(card);
+                }}
+            />
             <div className="preview">
-                <div className="details">{
-                    faceIndex <= -2
-                        ? <CardImage card={selectedCard}/>
-                        : faceIndex <= -1 
-                            ? <CardRulings card={selectedCard}/>
-                            : <CardFaceDetails face={selectedCard?.faces[faceIndex]}/>
-                }
-                </div>
-                <div className="buttons">
-                    <CardFaceButtons card={selectedCard} selectedFace={faceIndex} setSelectedFace={v => setSelected([selected, selectedCard, v])}/>
-                </div>
+                <PanelCardDetails card={selection}/>
             </div>
         </div>
     </div>;
 
+}
+
+
+function PanelCardDetails({card}: {card?: Card}) {
+    const lastCard = useLast(card, card);
+    const [mode,    setMode] = React.useState(DetailMode.Text);
+    const [faceRaw, setFace] = React.useState(0);
+
+    const face = card !== lastCard ? 0 : faceRaw;
+    React.useEffect(() => setFace(0), [card]);
+
+    let displayed;
+    switch(mode) {
+        case DetailMode.Image:   { displayed = <CardImage       key={card?.id} card={card}             />; } break;
+        case DetailMode.Rulings: { displayed = <CardRulings     key={card?.id} card={card}             />; } break;
+        case DetailMode.Text:    { displayed = <CardFaceDetails key={card?.id} face={card?.faces[face]}/>; } break;
+    }
+
+    return <>
+        <div className="details">{displayed}</div>
+        <div className="buttons">
+            <CardFaceButtons 
+                card    = {card} 
+                face    = {face}
+                setFace = {setFace}
+                mode    = {mode}
+                setMode = {setMode}
+            />
+        </div>
+    </>;
 }

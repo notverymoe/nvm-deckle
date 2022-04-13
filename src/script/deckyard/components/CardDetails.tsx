@@ -5,36 +5,43 @@ import * as React from "react";
 import { CardFace, Card } from "deckyard/types";
 import { ButtonGroup, Button } from "components/button";
 import { IconManaCost } from "./IconManaSymbol";
-import { CardRulings } from "./CardRulings";
 
+export enum DetailMode {
+    Text,
+    Rulings,
+    Image,
+}
 
-export function CardFaceButtons({card, selectedFace, setSelectedFace}: {
+export function CardFaceButtons({card, mode, setMode, face, setFace}: {
     card?: Card,
-    selectedFace: number,
-    setSelectedFace: (v: number) => void,
+    mode: DetailMode,
+    setMode: (v: DetailMode) => void,
+    face: number,
+    setFace: (v: number) => void,
 }) {
     return <div className="card-face-details-buttons">
         <ButtonGroup direction="vertical" className="card-face-buttons">
             {card?.faces.map((v, i) => <Button 
                 key={i} 
                 text={`Part ${v.side}`} 
-                action={() => setSelectedFace(i)}
-                selected={i === selectedFace}
+                action={() => {
+                    setFace(i);
+                    setMode(DetailMode.Text);
+                }}
+                selected={mode === DetailMode.Text && i === face}
             />)}
         </ButtonGroup>
         <Button
             className="card-button-rulings"
             text={"Rulings"}
-            action={() => setSelectedFace(-1)} 
-            disabled={!card?.rulings.length}
-            disabledTitle="No rulings for card"
-            selected={selectedFace === -1}
+            action={() => setMode(DetailMode.Rulings)} 
+            selected={mode === DetailMode.Rulings}
         />
         <Button
             className="card-button-image"
             text={"Image"}
-            action={() => setSelectedFace(-2)} 
-            selected={selectedFace === -2}
+            action={() => setMode(DetailMode.Image)} 
+            selected={mode === DetailMode.Image}
         />
     </div>;
 }
