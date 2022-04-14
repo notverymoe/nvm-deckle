@@ -8,6 +8,10 @@
     border: 1px solid #0002;
     box-sizing: border-box;
 
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 
     .card-symbol-background {
         position: absolute;

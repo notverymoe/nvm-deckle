@@ -49,20 +49,21 @@ export function CardFaceButtons({card, mode, setMode, face, setFace}: {
 export function CardFaceDetails({face}: {
     face?: CardFace,
 }) {
+    // TODO format symbols
     const text = React.useMemo(
         () => (face?.text ?? "").split('\n').map((v,i) => <p key={i}>{v}</p>), 
         [face?.text ?? ""]
     );
 
     return <div className="card-face-details">
-        <div className="row-0">
+        {face && <div className="row-0">
             <div className="name">{face?.name ?? ""}</div>
             <div className="cost"><IconManaCost cost={face?.manaCost ?? []}/></div>
-        </div>
-        <div className="row-1">
+        </div>}
+        {face && <div className="row-1">
             <div className="type">{face?.type ?? ""}</div>
             {face?.power && <div className="stats">{face.power}/{face.toughness}</div>}
-        </div>
-        <div className="text">{text}</div>
+        </div>}
+        {face && <div className="text">{text}</div>}
     </div>;
 }

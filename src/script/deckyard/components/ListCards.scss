@@ -5,13 +5,15 @@
         border-radius: 0.5em 0 0 0.25em;
         background-color: var(--bg-panel-3);
         box-shadow: inset black 0 0 4px 1px;
+        padding: 2px;
+        box-sizing: border-box;
 
-        .card-entry {
+
+        .card-entry, .card-group {
             &:nth-child(2) {
                 border-radius: 0.5em 0 0 0;
             }
 
-            position: relative;
             overflow: hidden;
             padding: 0 0.25em;
             gap: 0.25em;
@@ -21,7 +23,15 @@
             display: flex;
             align-items: center;
 
-            height: 1em;
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            
+            cursor: pointer;
+        }
+
+        .card-entry {
 
             .card-qty {
                 width: 2ch;
@@ -67,6 +77,12 @@
                 }
             }
         }
+
+        .card-group {
+            color: var(--fg-panel-1);
+            background-color: var(--bg-panel-1);
+
+        }
     }
 }
 
@@ -77,14 +93,16 @@
         .vlist-content {
             box-shadow: inset 0 0 0 1px var(--accent-1), inset black 0 0 6px 2px;
 
-            .card-entry.selected {
-                box-shadow: inset 0 0 0 1px var(--accent-1), 0 0 4px 1px black;
-                background-color: var(--bg-input-0);
+            .selected {
+                .card-entry, .card-group.selected {
+                    box-shadow: inset 0 0 0 1px var(--accent-1), 0 0 4px 1px black;
+                    background-color: var(--bg-input-0);
+                }
             }
         }
     }
 
-    &.unfocused .card-entry.selected {
+    &.unfocused .selected .card-entry, &.unfocused .selected .card-group {
         box-shadow: inset 0 0 0 1px var(--accent-3);
     }
 

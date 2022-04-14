@@ -7,7 +7,7 @@ import { createRoot } from "react-dom/client";
 
 import { useLast, useMemoAsync    } from "components/hooks";
 import { loadAtomicCards } from "api";
-import { ListCards       } from "deckyard/components/ListCards";
+import { ListCardDatabase       } from "deckyard/components/ListCards";
 import { CardFaceButtons, CardFaceDetails, DetailMode } from "deckyard/components/CardDetails";
 import { CardImage       } from "deckyard/components/CardImage";
 import { Card            } from "deckyard/types";
@@ -39,7 +39,7 @@ function PanelCardViewer({className}: {
     return <div className={joinClassNames("panel-card-viewer-container", className)}>
         <div className="panel-card-viewer">
             <div className="tools">Top</div>
-            <ListCards
+            <ListCardDatabase
                 selected={selected} 
                 setSelected={(id, card) => {
                     setSelected(id);
