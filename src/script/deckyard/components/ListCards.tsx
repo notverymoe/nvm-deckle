@@ -34,14 +34,6 @@ export function ListCardDatabase({selected, setSelected}: {
 
     const [count,    setCount   ] = React.useState(0);
     const [countVis, setCountVis] = React.useState(0);
-    React.useLayoutEffect(() => {
-        // TODO we can limit this to animation frames, maybe?
-        if (selected < offset) {
-            setOffset(Math.max(0, selected));
-        } else if (selected >= offset+countVis) {
-            setOffset(Math.max(0, selected - countVis + 1));
-        }
-    }, [selected]);
 
     return <ListCardInner 
         selected={selected} 
@@ -59,8 +51,7 @@ export function ListCardDatabase({selected, setSelected}: {
 // TODO seperate deck and database...
 // TODO deck efficiency (do we need a vlist?)
 
-function ListCardInner({className, selected, setSelected, count, offset, setOffset, setCount, setCountVis, setOffsetMax}: {
-    className?:  string,
+function ListCardInner({selected, setSelected, count, offset, setOffset, setCount, setCountVis, setOffsetMax}: {
     selected:    number,
     setSelected: (v: number, c: Card) => void,
     count: number,
@@ -73,10 +64,13 @@ function ListCardInner({className, selected, setSelected, count, offset, setOffs
     const [hasFocus, setHasFocus] = React.useState(false);
     const cards = React.useContext(DatabaseContext)?.cards ?? [];
 
-    const cardsShown = useRangeVirtual((i, length) => cards
-        .slice(i, i+length)
-        .map((v, j) => v ? <ListCardEntry key={i+j} card={v}/> : <div key={i+j}/>
-    ), offset, count, undefined, [cards]);
+    const cardsShown = useRangeVirtual(
+        (i, length) => cards.slice(i, i+length).map((v, j) => v ? <ListCardEntry key={i+j} card={v}/> : <div key={i+j}/>), 
+        offset, 
+        count, 
+        undefined, 
+        [cards]
+    );
 
     return <selectionContext.Provider value={{selected, setSelected}}>
         <VList 

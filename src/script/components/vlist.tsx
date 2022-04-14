@@ -36,21 +36,7 @@ export interface VListSelectableProps extends VListBaseProps {
 };
 
 export function VList(props: VListUnselectableProps | VListSelectableProps) {
-    const {
-        length, 
-        offset, 
-        setOffset, 
-        setCount, 
-        setCountVis,
-        setOffsetMax, 
-        lines: linesRaw, 
-        children, 
-        className,
-        refElem, 
-        tabIndex,
-        setHasFocus,
-        hasFocus,
-    } = props;
+    const { length, offset, setOffset, setCount, setCountVis, setOffsetMax, lines: linesRaw, children, className, refElem, tabIndex, setHasFocus, hasFocus } = props;
 
     const lines = linesRaw ?? 1; 
     const refContent     = useRef<HTMLDivElement | null>(null);
@@ -72,6 +58,16 @@ export function VList(props: VListUnselectableProps | VListSelectableProps) {
         }, 
         8
     );
+
+    React.useLayoutEffect(() => {
+        if (!props.selectable) return;
+        // TODO we can limit this to animation frames, maybe?
+        if (props.selection < offset) {
+            setOffset(Math.max(0, props.selection));
+        } else if (props.selection >= offset + countReal) {
+            setOffset(Math.max(0, props.selection - countReal + 1));
+        }
+    }, [props.selectable ? props.selection : null]);
 
     React.useEffect(() => {
         setCount(countDisp);
