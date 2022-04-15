@@ -31,10 +31,10 @@ const DOCUMENT_OPTIONS = {
 export async function convertFromMTGJSONAtomicCards(db: CardAtomicFile, yieldFreq = 1000): Promise<CardDatabase> {    
     const byCardType:      Partial<Record<CardType,      Set<Card>>> = {};
     const byCardTypeSuper: Partial<Record<CardTypeSuper, Set<Card>>> = {};
-    const byCardTypeSub: Partial<Record<string, Set<Card>>> = {};
+    const byCardTypeSub:   Partial<Record<string,        Set<Card>>> = {};
 
-    const byCardLayout:    Partial<Record<Layout,        Set<Card>>> = {};
-    const byCardIdentity:  Partial<Record<symbol,        Set<Card>>> = {};
+    const byCardLayout:    Partial<Record<Layout, Set<Card>>> = {};
+    const byCardIdentity:  Partial<Record<symbol, Set<Card>>> = {};
 
     const byCardTextExact: FlexSearch.Document<Card, true> = new FlexSearch.Document(
         DOCUMENT_OPTIONS
