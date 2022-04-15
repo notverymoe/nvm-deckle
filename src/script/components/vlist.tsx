@@ -84,6 +84,7 @@ export function VList(props: VListUnselectableProps | VListSelectableProps) {
             tabIndex={tabIndex}
             onFocus={() => setHasFocus(true)}
             onBlur={e => {
+                // TODO fix blur
                 if (isElementOrChildOf(e.relatedTarget as HTMLElement, e.currentTarget)) return;
                 setHasFocus(false);
             }}

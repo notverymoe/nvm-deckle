@@ -51,9 +51,7 @@ function PanelCardViewer({className}: {
             </div>
         </div>
     </div>;
-
 }
-
 
 function PanelCardDetails({card}: {card?: Card}) {
     const lastCard = useLast(card, card);

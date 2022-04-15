@@ -3,29 +3,35 @@ import { ManaSymbol, parseManaCost } from ".";
 import { CardType, normalizeCardTypes } from "./card_type";
 
 export interface CardFace {
+    id: number,
+    side: string,
+
     manaCost: ManaSymbol[],
+    cmc:      number | null,
 
     name: string,
     text: string,
     type: string,
     types: CardType[],
 
-    power?:     string,
-    toughness?: string,
-    side:       string,
+    power:     string | null,
+    toughness: string | null,
 }
 
-export function convertAtomicCardFace(card: CardAtomic): CardFace {
+export function convertAtomicCardFace(id: number, card: CardAtomic): CardFace {
     return {
+        id,
+        side:  card.side?.toUpperCase() ?? "A",
+
         manaCost: card.manaCost ? parseManaCost(card.manaCost) : [],
+        cmc:      card.faceManaValue ?? null,
 
         name:  card.faceName ?? card.name,
         text:  card.text ?? "",
         type:  card.type ?? "",
         types: normalizeCardTypes(card.types),
-        side:  card.side?.toUpperCase() ?? "A",
 
-        power:    card.power,
-        toughness: card.toughness,
+        power:     card.power     ?? null,
+        toughness: card.toughness ?? null,
     }
 }
