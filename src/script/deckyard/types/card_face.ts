@@ -1,6 +1,7 @@
 import { CardAtomic } from "mtgjson/card_atomic";
 import { ManaSymbol, parseManaCost } from ".";
 import { CardType, normalizeCardTypes } from "./card_type";
+import { CardTypeSuper, normalizeCardSuperTypes } from "./card_type_super";
 
 export interface CardFace {
     id: number,
@@ -11,8 +12,11 @@ export interface CardFace {
 
     name: string,
     text: string,
+
     type: string,
-    types: CardType[],
+    typesCard:  CardType[],
+    typesSuper: CardTypeSuper[],
+    typesSub:   string[],
 
     power:     string | null,
     toughness: string | null,
@@ -26,10 +30,13 @@ export function convertAtomicCardFace(id: number, card: CardAtomic): CardFace {
         manaCost: card.manaCost ? parseManaCost(card.manaCost) : [],
         cmc:      card.faceManaValue ?? null,
 
-        name:  card.faceName ?? card.name,
-        text:  card.text ?? "",
-        type:  card.type ?? "",
-        types: normalizeCardTypes(card.types),
+        name: card.faceName ?? card.name,
+        text: card.text ?? "",
+        
+        type: card.type,
+        typesCard:  normalizeCardTypes(card.types),
+        typesSuper: normalizeCardSuperTypes(card.supertypes),
+        typesSub:   [...card.subtypes],
 
         power:     card.power     ?? null,
         toughness: card.toughness ?? null,

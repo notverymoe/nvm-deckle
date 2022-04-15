@@ -11,6 +11,7 @@ import { CardAtomicFile } from "mtgjson/files";
 import { Card, convertAtomicCard } from "./card";
 import { Layout } from "./card_layout";
 import { CardType } from "./card_type";
+import { CardTypeSuper } from "./card_type_super";
 import { CardDatabase } from "./database";
 
 const DOCUMENT_OPTIONS = {
@@ -22,15 +23,18 @@ const DOCUMENT_OPTIONS = {
         index: [
             "name",
             "faces[]:text",
-            "faces[]:type",
+            "faces[]:typesSub"
         ],
     }
 };
 
 export async function convertFromMTGJSONAtomicCards(db: CardAtomicFile, yieldFreq = 1000): Promise<CardDatabase> {    
-    const byCardType:     Partial<Record<CardType, Set<Card>>> = {};
-    const byCardLayout:   Partial<Record<Layout,   Set<Card>>> = {};
-    const byCardIdentity: Partial<Record<symbol,   Set<Card>>> = {};
+    const byCardType:      Partial<Record<CardType,      Set<Card>>> = {};
+    const byCardTypeSuper: Partial<Record<CardTypeSuper, Set<Card>>> = {};
+    const byCardTypeSub: Partial<Record<string, Set<Card>>> = {};
+
+    const byCardLayout:    Partial<Record<Layout,        Set<Card>>> = {};
+    const byCardIdentity:  Partial<Record<symbol,        Set<Card>>> = {};
 
     const byCardTextExact: FlexSearch.Document<Card, true> = new FlexSearch.Document(
         DOCUMENT_OPTIONS
@@ -47,8 +51,14 @@ export async function convertFromMTGJSONAtomicCards(db: CardAtomicFile, yieldFre
         cards.push(card);
 
         for(const face of card.faces){
-            for(const type of face.types) {
+            for(const type of face.typesCard) {
                 addToSet(byCardType, type, card);
+            }
+            for(const type of face.typesSuper) {
+                addToSet(byCardTypeSuper, type, card);
+            }
+            for(const type of face.typesSub) {
+                addToSet(byCardTypeSub, type.toLowerCase(), card);
             }
         }
 
@@ -65,6 +75,8 @@ export async function convertFromMTGJSONAtomicCards(db: CardAtomicFile, yieldFre
         byCardTextExact,
         byCardTextFuzzy,
         byCardType,
+        byCardTypeSuper,
+        byCardTypeSub,
         byCardLayout,
         byCardIdentity
     );

@@ -4,11 +4,11 @@ import { Layout, normalizeCardLayout } from "./card_layout";
 import { ColourIdentity } from "./colour_identity";
 
 export interface Card {
-    id:      number,
-    name:    string,
-    faces:   CardFace[],
-    layout:  Layout,
-    rulings: Ruling[],
+    id:       number,
+    name:     string,
+    faces:    CardFace[],
+    layout:   Layout,
+    rulings:  Ruling[],
     identity: ColourIdentity,
 }
 

@@ -38,7 +38,7 @@ const typeMap: Record<CardType, SVGComponent | null> = {
 export function IconCardType({card}: {
     card: Card
 }) {
-    const types = new Set<CardType>(card.faces.flatMap(v => v.types)); // TODO memo
+    const types = new Set<CardType>(card.faces.flatMap(v => v.typesCard)); // TODO memo
     
     let SVGIcon: SVGComponent;
     if (types.size === 1) {
