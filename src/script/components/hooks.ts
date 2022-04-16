@@ -79,6 +79,13 @@ export function useElementWidth(ref: React.RefObject<HTMLElement>): number | nul
     return width;
 }
 
+export function useTrigger(): [number, () => void] {
+    const [triggerVal, setTrigger] = React.useState(0);
+    const triggerCurrent = React.useRef(0);
+    const trigger = React.useCallback(() => setTrigger(triggerCurrent.current += 1), []);
+    return [triggerVal, trigger];
+}
+
 export function useRangeVirtual<T>(
     callback: (idx: number, count: number) => T[],
     index: number,

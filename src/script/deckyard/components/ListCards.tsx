@@ -3,7 +3,7 @@ import "./ListCards.scss";
 
 import * as React from "react";
 
-import { useRangeVirtual } from "components/hooks";
+import { useRangeVirtual, useTrigger } from "components/hooks";
 import { VList           } from "components/vlist";
 import { DatabaseContext } from "../state";
 import { Card            } from "../types";
@@ -32,6 +32,37 @@ export interface CardListMetadata {
     groups: CardGroup<CardWithMetadata>[];
 }
 
+export function useCollapseTracker(cards: CardListRaw | CardListMetadata, defaultState: boolean = false) {
+
+    const [collapseTrigger, fireCollapseTrigger] = useTrigger();
+    const [   resetTrigger, fireResetTrigger   ] = useTrigger();
+
+    const defaultChanged = React.useRef(0);
+    const defaultStateRef = React.useRef(defaultState);
+    defaultStateRef.current = defaultState;
+
+    const collapsed = React.useMemo<boolean[]>(() => {
+        defaultChanged.current += 1;   
+        return [];
+    }, [cards, resetTrigger, defaultState]);
+    const setCollapsed = React.useCallback((v: number, state: boolean) => { 
+        if ((collapsed[v] ?? defaultStateRef.current) != state) {
+            collapsed[v] = state; 
+            fireCollapseTrigger();
+        }
+    }, [collapsed]);
+    const getCollapsed = React.useCallback(
+        (v: number) => collapsed[v] ?? defaultStateRef.current, 
+        [collapsed]
+    );
+
+    return  [
+        collapseTrigger+resetTrigger+defaultChanged.current, 
+        getCollapsed, 
+        setCollapsed, 
+        fireResetTrigger
+    ] as const;
+}
 
 export function ListCardDatabase({selected, setSelected}: {
     selected:    number,
@@ -46,29 +77,37 @@ export function ListCardDatabase({selected, setSelected}: {
         : [{name: "Loading...", contents: []      }]
     }), [db?.cards]);
 
+
+    const [collapseTrigger, getCollapsed, setCollapsed] = useCollapseTracker(cards, false);
+
     return <ListCard
         cards={cards}
         selected={selected} 
         setSelected={setSelected}
+        collapseTrigger={collapseTrigger}
+        setCollapsed={setCollapsed}
+        getCollapsed={getCollapsed}
     />;
 }
 
-function ListCard({selected, setSelected, cards}: {
+function ListCard({selected, setSelected, cards, getCollapsed, setCollapsed, collapseTrigger}: {
     selected:    number,
     setSelected: (v: number, c: Card | null) => void,
     cards: CardListRaw | CardListMetadata,
+
+    getCollapsed: (v: number) => boolean,
+    setCollapsed: (v: number, state: boolean) => void,
+    collapseTrigger: number,
 }) {
-    const [count,    setCount   ] = React.useState(0);
+    const [count,     setCount    ] = React.useState(0);
     const [offset,    setOffsetRaw] = React.useState(0);
     const [offsetMax, setOffsetMax] = React.useState(0);
     const setOffset = (v: number) => setOffsetRaw(Math.max(0, Math.min(offsetMax, Math.trunc(v))));
 
     const [hasFocus, setHasFocus] = React.useState(false);
 
-    const [trigger, setTrigger] = React.useState(false);
-    const collpased = React.useMemo((): boolean[] => [], [cards]);
     const maxLength = (cards.groups as CardGroup<any>[]).reduce<number>((p, v, i) => {
-        return p + (collpased[i] ? 1 : v.contents.length + 1);
+        return p + (getCollapsed(i) ? 1 : v.contents.length + 1);
     }, 0);
 
     const cardsShown = useRangeVirtual(
@@ -76,7 +115,7 @@ function ListCard({selected, setSelected, cards}: {
             // TODO this is horrid
             let offset = 0;
             const startGroup = cards.groups.findIndex((v, j) => {
-                let length = collpased[j] ? 1 : (v.contents.length + 1);
+                let length = getCollapsed(j) ? 1 : (v.contents.length + 1);
                 if (offset + length >= i) return true;
                 offset += length;
             });
@@ -88,17 +127,14 @@ function ListCard({selected, setSelected, cards}: {
                     result.push(<ListCardGroup
                         key={i + result.length}
                         name={cards.groups[j].name}
-                        collapsed={!!collpased[j]}
-                        toggle={() => {
-                            collpased[j] = !collpased[j];
-                            setTrigger(!trigger);
-                        }}
+                        collapsed={getCollapsed(j)}
+                        toggle={() => setCollapsed(j, !getCollapsed(j))}
                     />);
                 } else {
                     skip -= 1;
                 }
 
-                if (!collpased[j]) {;
+                if (!getCollapsed(j)) {;
                     if (cards.hasMetadata) {
                         const contents = cards.groups[j].contents;
                         for(let k = skip; k < contents.length && result.length < length; k++) {
@@ -125,7 +161,7 @@ function ListCard({selected, setSelected, cards}: {
         offset, 
         count, 
         undefined, 
-        [trigger, cards]
+        [collapseTrigger, cards]
     );
 
     return <selectionContext.Provider value={{selected, setSelected}}>
