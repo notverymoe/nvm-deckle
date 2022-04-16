@@ -74,7 +74,6 @@ function ListCard({selected, setSelected, cards}: {
     const cardsShown = useRangeVirtual(
         (i, length) => {
             // TODO this is horrid
-            // TODO BUG inconsistent duplication?
             let offset = 0;
             const startGroup = cards.groups.findIndex((v, j) => {
                 let length = collpased[j] ? 1 : (v.contents.length + 1);
@@ -95,6 +94,8 @@ function ListCard({selected, setSelected, cards}: {
                             setTrigger(!trigger);
                         }}
                     />);
+                } else {
+                    skip -= 1;
                 }
 
                 if (!collpased[j]) {;
