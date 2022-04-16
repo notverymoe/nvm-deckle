@@ -4,7 +4,7 @@ import * as React from "react";
 
 import { Card } from "deckyard/types";
 
-export function CardRulings({card}: {card?: Card}) {
+export function CardRulings({card}: {card?: Card | null | undefined}) {
     return <div className="card-rulings">{card?.rulings.length
         ? card.rulings.flatMap((v, i) => [
             <div key={i*2  } className="date">{v.date}</div>,

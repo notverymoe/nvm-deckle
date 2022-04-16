@@ -12,7 +12,7 @@ import { Button, ButtonGroup } from "components/button";
 
 const imageRatio = 488/680;
 
-export function CardImage({card}: {card?: Card}) {
+export function CardImage({card}: {card?: Card | null | undefined}) {
     const [rotationRaw, setRotationRaw] = React.useState(0);
     const rotation = React.useRef(rotationRaw); // TODO default rotation for split cards
     const applyRotation = (v: number) => {

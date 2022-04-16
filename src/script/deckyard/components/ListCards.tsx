@@ -3,9 +3,8 @@ import "./ListCards.scss";
 
 import * as React from "react";
 
-import { useDeferredAction, useRangeVirtual } from "components/hooks";
-import { VList                              } from "components/vlist";
-import { isElementOrChildOf, joinClassNames } from "util/shared";
+import { useRangeVirtual } from "components/hooks";
+import { VList           } from "components/vlist";
 import { DatabaseContext } from "../state";
 import { Card            } from "../types";
 import { IconCardType    } from "./IconCardType";
@@ -13,73 +12,128 @@ import { IconManaCostSet } from "./IconManaSymbol";
 
 const selectionContext = React.createContext<{selected: number, setSelected: (idx: number, card: Card) => void} | null>(null);;
 
-
-export interface CardGroup {
+export interface CardGroup<T> {
     name: string,
-    data: (CardGroupEntry | Card)[],
+    contents: T[],
 }
 
-export interface CardGroupEntry {
-    card: Card,
-    qty:  number,
+export interface CardListRaw {
+    hasMetadata?: false,
+    groups: CardGroup<Card>[],
 }
+
+export interface CardWithMetadata {
+    qty: number,
+    card: Card,
+}
+
+export interface CardListMetadata {
+    hasMetadata: true,
+    groups: CardGroup<CardWithMetadata>[];
+}
+
 
 export function ListCardDatabase({selected, setSelected}: {
     selected:    number,
-    setSelected: (v: number, c: Card) => void
+    setSelected: (v: number, c: Card | null) => void,
 }) {
+
+    const db = React.useContext(DatabaseContext);
+
+    const cards = React.useMemo<CardListRaw>(() => ({
+        groups: db 
+        ? [{name: "Database",   contents: db.cards}] 
+        : [{name: "Loading...", contents: []      }]
+    }), [db?.cards]);
+
+    return <ListCard
+        cards={cards}
+        selected={selected} 
+        setSelected={setSelected}
+    />;
+}
+
+function ListCard({selected, setSelected, cards}: {
+    selected:    number,
+    setSelected: (v: number, c: Card | null) => void,
+    cards: CardListRaw | CardListMetadata,
+}) {
+    const [count,    setCount   ] = React.useState(0);
     const [offset,    setOffsetRaw] = React.useState(0);
     const [offsetMax, setOffsetMax] = React.useState(0);
     const setOffset = (v: number) => setOffsetRaw(Math.max(0, Math.min(offsetMax, Math.trunc(v))));
 
-    const [count,    setCount   ] = React.useState(0);
-    const [countVis, setCountVis] = React.useState(0);
-
-    return <ListCardInner 
-        selected={selected} 
-        setSelected={setSelected} 
-        count={count}
-        offset={offset}
-        setOffset={setOffset}
-        setCount={setCount}
-        setCountVis={setCountVis}
-        setOffsetMax={setOffsetMax}
-    />;
-}
-
-// TODO resize not triggering update of range virtual?
-// TODO seperate deck and database...
-// TODO deck efficiency (do we need a vlist?)
-
-function ListCardInner({selected, setSelected, count, offset, setOffset, setCount, setCountVis, setOffsetMax}: {
-    selected:    number,
-    setSelected: (v: number, c: Card) => void,
-    count: number,
-    offset: number,
-    setOffset:     (v: number) => void,
-    setCount:      (v: number) => void,
-    setCountVis?:  (v: number) => void,
-    setOffsetMax?: (v: number) => void,
-}) {
     const [hasFocus, setHasFocus] = React.useState(false);
-    const cards = React.useContext(DatabaseContext)?.cards ?? [];
+
+    const [trigger, setTrigger] = React.useState(false);
+    const collpased = React.useMemo((): boolean[] => [], [cards]);
+    const maxLength = (cards.groups as CardGroup<any>[]).reduce<number>((p, v, i) => {
+        return p + (collpased[i] ? 1 : v.contents.length + 1);
+    }, 0);
 
     const cardsShown = useRangeVirtual(
-        (i, length) => cards.slice(i, i+length).map((v, j) => v ? <ListCardEntry key={i+j} card={v}/> : <div key={i+j}/>), 
+        (i, length) => {
+            // TODO this is horrid
+            // TODO BUG inconsistent duplication?
+            let offset = 0;
+            const startGroup = cards.groups.findIndex((v, j) => {
+                let length = collpased[j] ? 1 : (v.contents.length + 1);
+                if (offset + length >= i) return true;
+                offset += length;
+            });
+
+            let skip = i - offset;
+            let result: JSX.Element[] = [];
+            for(let j = startGroup; j < cards.groups.length && result.length < length; j++) {
+                if (skip === 0) {
+                    result.push(<ListCardGroup
+                        key={i + result.length}
+                        name={cards.groups[j].name}
+                        collapsed={!!collpased[j]}
+                        toggle={() => {
+                            collpased[j] = !collpased[j];
+                            setTrigger(!trigger);
+                        }}
+                    />);
+                }
+
+                if (!collpased[j]) {;
+                    if (cards.hasMetadata) {
+                        const contents = cards.groups[j].contents;
+                        for(let k = skip; k < contents.length && result.length < length; k++) {
+                            result.push(<ListCardEntry
+                                key={i + result.length}
+                                qty ={contents[k].qty }
+                                card={contents[k].card}
+                            />);
+                        }
+                    } else {
+                        const contents = cards.groups[j].contents;
+                        for(let k = skip; k < contents.length && result.length < length; k++) {
+                            result.push(<ListCardEntry
+                                key={i + result.length}
+                                card={contents[k]}
+                            />);
+                        }
+                    }
+                }
+                skip = 0;
+            }
+            return result;
+        }, 
         offset, 
         count, 
         undefined, 
-        [cards]
+        [trigger, cards]
     );
 
     return <selectionContext.Provider value={{selected, setSelected}}>
         <VList 
             lines={1} 
-            length={cards.length}
+            length={maxLength}
             offset={offset}
             setOffset={setOffset}
             setCount={setCount}
-            setCountVis={setCountVis}
             setOffsetMax={setOffsetMax}
             className="list-cards"
             setHasFocus={setHasFocus}
@@ -87,7 +141,7 @@ function ListCardInner({selected, setSelected, count, offset, setOffset, setCoun
             tabIndex={0}
             selectable
             selection={selected}
-            setSelection={v => setSelected(v, cards[v])}
+            setSelection={v => setSelected(v, (cardsShown[v - offset]?.props as any)?.card)} // TODO HACK
         >{cardsShown}</VList>
     </selectionContext.Provider>;
 }

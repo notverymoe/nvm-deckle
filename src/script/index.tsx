@@ -34,7 +34,7 @@ function PanelCardViewer({className}: {
     className?: string,
 }) {
     const [selected,  setSelected ] = React.useState(-1);
-    const [selection, setSelection] = React.useState<Card | undefined>(undefined);
+    const [selection, setSelection] = React.useState<Card | null>(null);
 
     return <div className={joinClassNames("panel-card-viewer-container", className)}>
         <div className="panel-card-viewer">
@@ -53,7 +53,7 @@ function PanelCardViewer({className}: {
     </div>;
 }
 
-function PanelCardDetails({card}: {card?: Card}) {
+function PanelCardDetails({card}: {card?: Card | null | undefined}) {
     const lastCard = useLast(card, card);
     const [mode,    setMode] = React.useState(DetailMode.Text);
     const [faceRaw, setFace] = React.useState(0);

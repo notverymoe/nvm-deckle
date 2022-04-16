@@ -18,6 +18,3 @@ export function* iterDifference<T>(a: Set<T>, ...b: Iterable<T>[]) {
         if (!a.has(val)) yield val;
     }
 }
-
-
-

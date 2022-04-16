@@ -14,7 +14,6 @@ export interface VListBaseProps {
     offset: number,
     setOffset:     (v: number) => void,
     setCount:      (v: number) => void,
-    setCountVis?:  (v: number) => void,
     setOffsetMax?: (v: number) => void,
     setHasFocus:  (v: boolean) => void,
     hasFocus:      boolean,
@@ -36,7 +35,7 @@ export interface VListSelectableProps extends VListBaseProps {
 };
 
 export function VList(props: VListUnselectableProps | VListSelectableProps) {
-    const { length, offset, setOffset, setCount, setCountVis, setOffsetMax, lines: linesRaw, children, className, refElem, tabIndex, setHasFocus, hasFocus } = props;
+    const { length, offset, setOffset, setCount, setOffsetMax, lines: linesRaw, children, className, refElem, tabIndex, setHasFocus, hasFocus } = props;
 
     const lines = linesRaw ?? 1; 
     const refContent     = useRef<HTMLDivElement | null>(null);
@@ -67,13 +66,12 @@ export function VList(props: VListUnselectableProps | VListSelectableProps) {
         } else if (props.selection >= offset + countReal) {
             setOffset(Math.max(0, props.selection - countReal + 1));
         }
-    }, [props.selectable ? props.selection : null]);
+    }, [countReal, props.selectable ? props.selection : null]);
 
     React.useEffect(() => {
         setCount(countDisp);
-        setCountVis?.(countReal);
         setOffsetMax?.(offsetMax);
-    }, [countReal, countDisp, offsetMax]);
+    }, [countDisp, offsetMax]);
 
     return <div className={joinClassNames("vlist", hasFocus && "focused" || "unfocused", className)} ref={refElem}>
         <div

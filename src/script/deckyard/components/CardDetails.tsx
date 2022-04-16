@@ -13,7 +13,7 @@ export enum DetailMode {
 }
 
 export function CardFaceButtons({card, mode, setMode, face, setFace}: {
-    card?: Card,
+    card?: Card | null | undefined,
     mode: DetailMode,
     setMode: (v: DetailMode) => void,
     face: number,

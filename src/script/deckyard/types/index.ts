@@ -33,33 +33,21 @@ export async function convertFromMTGJSONAtomicCards(db: CardAtomicFile, yieldFre
     const byCardTypeSuper: Partial<Record<CardTypeSuper, Set<Card>>> = {};
     const byCardTypeSub:   Partial<Record<string,        Set<Card>>> = {};
 
-    const byCardLayout:    Partial<Record<Layout, Set<Card>>> = {};
-    const byCardIdentity:  Partial<Record<symbol, Set<Card>>> = {};
+    const byCardLayout:   Partial<Record<Layout, Set<Card>>> = {};
+    const byCardIdentity: Partial<Record<symbol, Set<Card>>> = {};
 
-    const byCardTextExact: FlexSearch.Document<Card, true> = new FlexSearch.Document(
-        DOCUMENT_OPTIONS
-    );
-    const byCardTextFuzzy: FlexSearch.Document<Card, true> = new FlexSearch.Document({
-        ...DOCUMENT_OPTIONS,
-        tokenize: "full",
-    });
+    const byCardTextExact: FlexSearch.Document<Card, true> = new FlexSearch.Document(DOCUMENT_OPTIONS);
+    const byCardTextFuzzy: FlexSearch.Document<Card, true> = new FlexSearch.Document({...DOCUMENT_OPTIONS, tokenize: "full"});
 
     const cards: Card[] = [];
     for(const [name, faces] of Object.entries(db.data)) {
         const card = convertAtomicCard(name, faces, cards.length);
-
         cards.push(card);
 
         for(const face of card.faces){
-            for(const type of face.typesCard) {
-                addToSet(byCardType, type, card);
-            }
-            for(const type of face.typesSuper) {
-                addToSet(byCardTypeSuper, type, card);
-            }
-            for(const type of face.typesSub) {
-                addToSet(byCardTypeSub, type.toLowerCase(), card);
-            }
+            for(const type of face.typesCard ) addToSet(byCardType,      type,               card);
+            for(const type of face.typesSuper) addToSet(byCardTypeSuper, type,               card);
+            for(const type of face.typesSub  ) addToSet(byCardTypeSub,   type.toLowerCase(), card);
         }
 
         byCardTextFuzzy.add(card);
