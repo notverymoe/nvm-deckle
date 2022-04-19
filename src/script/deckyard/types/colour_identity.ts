@@ -41,6 +41,30 @@ export class ColourIdentity {
         return ColourIdentity.fromParts(colours as ColourIdentityPart[]);
     }
 
+    static get colourless() {
+        return this.getUnique(Symbol.for(""));
+    }
+
+    static get white() {
+        return this.getUnique(Symbol.for(ColourIdentityPart.White));
+    }
+
+    static get blue() {
+        return this.getUnique(Symbol.for(ColourIdentityPart.Blue));
+    }
+
+    static get black() {
+        return this.getUnique(Symbol.for(ColourIdentityPart.Black));
+    }
+
+    static get red() {
+        return this.getUnique(Symbol.for(ColourIdentityPart.Red));
+    }
+
+    static get green() {
+        return this.getUnique(Symbol.for(ColourIdentityPart.Green));
+    }
+
     static fromParts(colours: ColourIdentityPart[]) {
         return this.fromPartsRaw([...new Set(colours).values()])
     }

@@ -13,7 +13,7 @@
     overflow-y: scroll;
     overflow-x: hidden;
 
-    background-color: var(--bg-panel-4);
+    background-color: var(--bg-panel-3);
     box-shadow: inset black 0 0 6px 2px;
     border-radius: 0.5em;
     padding: 0.35em;
@@ -24,7 +24,7 @@
         padding: 0.25em 0.5em;
         width: max-content;
         font-size: 80%;
-        border: 1px solid var(--bg-panel-4);
+        border: 1px solid var(--bg-panel-3);
         box-sizing: border-box;
 
         display: flex;
@@ -42,7 +42,7 @@
         min-width: 0;
         word-break: break-word;
         font-size: 90%;
-        border: 1px solid var(--bg-panel-4);
+        border: 1px solid var(--bg-panel-3);
         box-sizing: border-box;
 
         display: flex;

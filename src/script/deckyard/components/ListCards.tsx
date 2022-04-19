@@ -6,9 +6,10 @@ import * as React from "react";
 import { useRangeVirtual, useTrigger } from "components/hooks";
 import { VList           } from "components/vlist";
 import { DatabaseContext } from "../state";
-import { Card            } from "../types";
+import { Card } from "../types";
 import { IconCardType    } from "./IconCardType";
 import { IconManaCostSet } from "./IconManaSymbol";
+import { DatabaseFilter, useDatabaseFilter } from "deckyard/filters";
 
 const selectionContext = React.createContext<{selected: number, setSelected: (idx: number, card: Card) => void} | null>(null);;
 
@@ -64,33 +65,7 @@ export function useCollapseTracker(cards: CardListRaw | CardListMetadata, defaul
     ] as const;
 }
 
-export function ListCardDatabase({selected, setSelected}: {
-    selected:    number,
-    setSelected: (v: number, c: Card | null) => void,
-}) {
-
-    const db = React.useContext(DatabaseContext);
-
-    const cards = React.useMemo<CardListRaw>(() => ({
-        groups: db 
-        ? [{name: "Database",   contents: db.cards}] 
-        : [{name: "Loading...", contents: []      }]
-    }), [db?.cards]);
-
-
-    const [collapseTrigger, getCollapsed, setCollapsed] = useCollapseTracker(cards, false);
-
-    return <ListCard
-        cards={cards}
-        selected={selected} 
-        setSelected={setSelected}
-        collapseTrigger={collapseTrigger}
-        setCollapsed={setCollapsed}
-        getCollapsed={getCollapsed}
-    />;
-}
-
-function ListCard({selected, setSelected, cards, getCollapsed, setCollapsed, collapseTrigger}: {
+export function ListCard({selected, setSelected, cards, getCollapsed, setCollapsed, collapseTrigger}: {
     selected:    number,
     setSelected: (v: number, c: Card | null) => void,
     cards: CardListRaw | CardListMetadata,

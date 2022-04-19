@@ -15,7 +15,7 @@ import { CardType } from "deckyard/types/card_type";
 import { SVGComponent } from "components/util";
 
 
-const typeMap: Record<CardType, SVGComponent | null> = {
+const typeMap: Record<string, SVGComponent | null> = {
     [CardType.Artifact]:     IconCardTypeArtifact,
     [CardType.Creature]:     IconCardTypeCreature,
     [CardType.Enchantment]:  IconCardTypeEnchantment,
@@ -32,17 +32,16 @@ const typeMap: Record<CardType, SVGComponent | null> = {
     [CardType.Vanguard]:     null, // TODO icon?
     [CardType.Dungeon]:      null, // TODO icon?
     [CardType.Hero]:         null, // TODO icon?
-    [CardType.Unknown]:      IconCardTypeUnknown, // TODO icon?
 };
 
 export function IconCardType({card}: {
     card: Card
 }) {
-    const types = new Set<CardType>(card.faces.flatMap(v => v.typesCard)); // TODO memo
+    const types = new Set<string>(card.faces.flatMap(v => v.typesCard)); // TODO memo
     
     let SVGIcon: SVGComponent;
     if (types.size === 1) {
-        let cardType: CardType = types.keys().next()!.value;
+        let cardType: string = types.keys().next()!.value;
         SVGIcon = typeMap[cardType] ?? (() => <></>);
         if (SVGIcon === undefined) console.warn("Unknown type: " + cardType);
     } else {

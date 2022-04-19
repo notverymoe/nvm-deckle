@@ -66,11 +66,13 @@ export function CardImage({card}: {card?: Card | null | undefined}) {
 }
 
 function useScryfallImageAsync(id: string | undefined | null, back?: boolean, noBack?: boolean) {
-    //return [false, null, null];
-    const [loading, blob, error] = useMemoAsync(async () => {
+    return [false, null, null];
+    /*const [loading, blob, error] = useMemoAsync(async () => {
         if (!id || noBack) return undefined;
         // TODO proper stringify
         // HACK "_____" only works in fuzzy search?
+        // TODO cards with backs baesed on layouts, meld cards
+        // TODO make cancellable
         const image = await makeScryfallRequest(
             id !== "_____"
                 ? `https://api.scryfall.com/cards/named?exact=${id.replaceAll(" ", "+")}&format=image&version=normal&face=${back ? "back" : "front"}`
@@ -89,7 +91,7 @@ function useScryfallImageAsync(id: string | undefined | null, back?: boolean, no
         return () => URL.revokeObjectURL(blob);
     }, [blob]);
 
-    return [loading, blob, error] as const;
+    return [loading, blob, error] as const;*/
 }
 
 let lastPromise = Promise.resolve();

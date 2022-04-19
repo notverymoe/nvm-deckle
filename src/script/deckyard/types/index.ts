@@ -9,9 +9,6 @@ import * as FlexSearch from "flexsearch";
 
 import { CardAtomicFile } from "mtgjson/files";
 import { Card, convertAtomicCard } from "./card";
-import { Layout } from "./card_layout";
-import { CardType } from "./card_type";
-import { CardTypeSuper } from "./card_type_super";
 import { CardDatabase } from "./database";
 
 const DOCUMENT_OPTIONS = {
@@ -29,19 +26,23 @@ const DOCUMENT_OPTIONS = {
 };
 
 export async function convertFromMTGJSONAtomicCards(db: CardAtomicFile, yieldFreq = 1000): Promise<CardDatabase> {    
-    const byCardType:      Partial<Record<CardType,      Set<Card>>> = {};
-    const byCardTypeSuper: Partial<Record<CardTypeSuper, Set<Card>>> = {};
-    const byCardTypeSub:   Partial<Record<string,        Set<Card>>> = {};
+    const byCardType:      Partial<Record<string, Set<Card>>> = {};
+    const byCardTypeSuper: Partial<Record<string, Set<Card>>> = {};
+    const byCardTypeSub:   Partial<Record<string, Set<Card>>> = {};
 
-    const byCardLayout:   Partial<Record<Layout, Set<Card>>> = {};
+    const byCardLayout:   Partial<Record<string, Set<Card>>> = {};
     const byCardIdentity: Partial<Record<symbol, Set<Card>>> = {};
 
     const byCardTextExact: FlexSearch.Document<Card, true> = new FlexSearch.Document(DOCUMENT_OPTIONS);
-    const byCardTextFuzzy: FlexSearch.Document<Card, true> = new FlexSearch.Document({...DOCUMENT_OPTIONS, tokenize: "full"});
+    const byCardTextFuzzy: FlexSearch.Document<Card, true> = new FlexSearch.Document({
+        ...DOCUMENT_OPTIONS, 
+        tokenize: "full"
+    });
 
     const cards: Card[] = [];
     for(const [name, faces] of Object.entries(db.data)) {
         const card = convertAtomicCard(name, faces, cards.length);
+        if (!card) continue;
         cards.push(card);
 
         for(const face of card.faces){
@@ -50,8 +51,8 @@ export async function convertFromMTGJSONAtomicCards(db: CardAtomicFile, yieldFre
             for(const type of face.typesSub  ) addToSet(byCardTypeSub,   type.toLowerCase(), card);
         }
 
-        byCardTextFuzzy.add(card);
         byCardTextExact.add(card);
+        byCardTextFuzzy.add(card);
         addToSet(byCardIdentity, card.identity.toSymbol(), card);
         addToSet(byCardLayout,   card.layout,              card);
 
@@ -60,8 +61,8 @@ export async function convertFromMTGJSONAtomicCards(db: CardAtomicFile, yieldFre
 
     return new CardDatabase(
         cards,
-        byCardTextExact,
         byCardTextFuzzy,
+        byCardTextExact,
         byCardType,
         byCardTypeSuper,
         byCardTypeSub,

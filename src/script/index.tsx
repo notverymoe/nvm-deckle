@@ -7,13 +7,14 @@ import { createRoot } from "react-dom/client";
 
 import { useLast, useMemoAsync    } from "components/hooks";
 import { loadAtomicCards } from "api";
-import { ListCardDatabase       } from "deckyard/components/ListCards";
+import { CardListRaw, ListCard, useCollapseTracker    } from "deckyard/components/ListCards";
 import { CardFaceButtons, CardFaceDetails, DetailMode } from "deckyard/components/CardDetails";
 import { CardImage       } from "deckyard/components/CardImage";
 import { Card            } from "deckyard/types";
 import { DatabaseContext } from "deckyard/state";
 import { joinClassNames } from "util/shared";
 import { CardRulings } from "deckyard/components/CardRulings";
+import { DatabaseFilter, useDatabaseFilter } from "deckyard/filters";
 
 (async function() {
     const rootElem = document.getElementById("app-root");
@@ -36,15 +37,34 @@ function PanelCardViewer({className}: {
     const [selected,  setSelected ] = React.useState(-1);
     const [selection, setSelection] = React.useState<Card | null>(null);
 
+    const db = React.useContext(DatabaseContext);
+    /*const filters = React.useMemo<DatabaseFilter[]>(() => [
+        {field: "text", query: "elf creatures", fuzzy: "exact"}
+    ], []);*/
+    //const [,filtered,] = useDatabaseFilter(db, filters)
+
+    const cards = React.useMemo<CardListRaw>(() => ({
+        groups: db 
+        ? [{name: "Database",   contents: [...(db.cards ?? [])]}] 
+        : [{name: "Loading...", contents: []      }]
+    }), [db]);
+
+
+    const [collapseTrigger, getCollapsed, setCollapsed] = useCollapseTracker(cards, false);
+
     return <div className={joinClassNames("panel-card-viewer-container", className)}>
         <div className="panel-card-viewer">
             <div className="tools">Top</div>
-            <ListCardDatabase
+            <ListCard
+                cards={cards}
                 selected={selected} 
                 setSelected={(id, card) => {
                     setSelected(id);
                     setSelection(card);
                 }}
+                collapseTrigger={collapseTrigger}
+                getCollapsed={getCollapsed}
+                setCollapsed={setCollapsed}
             />
             <div className="preview">
                 <PanelCardDetails card={selection}/>

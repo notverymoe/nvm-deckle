@@ -1,7 +1,7 @@
 import { CardAtomic } from "mtgjson/card_atomic";
 import { ManaSymbol, parseManaCost } from ".";
-import { CardType, normalizeCardTypes } from "./card_type";
-import { CardTypeSuper, normalizeCardSuperTypes } from "./card_type_super";
+import { convertCardTypes, verifyCardType } from "./card_type";
+import { verifyCardTypeSuper } from "./card_type_super";
 
 export interface CardFace {
     id: number,
@@ -14,8 +14,8 @@ export interface CardFace {
     text: string,
 
     type: string,
-    typesCard:  CardType[],
-    typesSuper: CardTypeSuper[],
+    typesCard:  string[],
+    typesSuper: string[],
     typesSub:   string[],
 
     power:     string | null,
@@ -34,11 +34,15 @@ export function convertAtomicCardFace(id: number, card: CardAtomic): CardFace {
         text: card.text ?? "",
         
         type: card.type,
-        typesCard:  normalizeCardTypes(card.types),
-        typesSuper: normalizeCardSuperTypes(card.supertypes),
-        typesSub:   [...card.subtypes],
+        typesCard:  [...new Set(card.types.map(normalizeTypeIdentifier).map(convertCardTypes).filter(verifyCardType))],
+        typesSuper: [...new Set(card.supertypes.map(normalizeTypeIdentifier).filter(verifyCardTypeSuper))],
+        typesSub:   [...new Set(card.subtypes.map(normalizeTypeIdentifier))],
 
         power:     card.power     ?? null,
         toughness: card.toughness ?? null,
     }
+}
+
+export function normalizeTypeIdentifier(type: string) {
+    return type.toLowerCase().replaceAll(/_/g, " ").trim();;
 }

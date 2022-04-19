@@ -1,34 +1,25 @@
 
 export enum CardTypeSuper {
-    Basic     = "Basic",
-    Legendary = "Legendary",
-    Ongoing   = "Ongoing",
-    Snow      = "Snow",
-    World     = "World",
-    Elite     = "Elite",
-    Host      = "Host",
-    Unknown   = "?Unknown?",
+    Basic     = "basic",
+    Legendary = "legendary",
+    Ongoing   = "ongoing",
+    Snow      = "snow",
+    World     = "world",
+    Elite     = "elite",
+    Host      = "host",
 }
 
-export function normalizeCardSuperTypes(cardTypes: string[]): CardTypeSuper[] {
-    return [...new Set(cardTypes.map(normalizeCardSuperType).filter((v): v is CardTypeSuper => !!v)).values()];
+export const CARD_TYPES_SUPER = Object.values(CardTypeSuper).filter((v): v is CardTypeSuper => v[0] === v[0].toLowerCase());
+
+export function isCardTypeSuperKnown(v: string | CardTypeSuper): v is CardTypeSuper {
+    return (CARD_TYPES_SUPER as string[]).includes(v);
 }
 
-export function normalizeCardSuperType(cardType: string): CardTypeSuper | null {
-    cardType = cardType.trim();
-    cardType = cardType.charAt(0).toUpperCase() + cardType.slice(1);
-
-    switch(cardType) {
-        case CardTypeSuper.Basic:     
-        case CardTypeSuper.Legendary:     
-        case CardTypeSuper.Ongoing:  
-        case CardTypeSuper.Snow:      
-        case CardTypeSuper.World:         
-        case CardTypeSuper.Elite:       
-        case CardTypeSuper.Host:
-            return cardType;
+export function verifyCardTypeSuper(cardType: string): boolean {
+    if (!isCardTypeSuperKnown(cardType)) {
+        console.warn("Unknown card type super: " + cardType);
+        return true; // Intentional
+    } else {
+        return true;
     }
-
-    console.warn("Unknown card super type: " + cardType);
-    return CardTypeSuper.Unknown;
 }

@@ -1,13 +1,13 @@
 import { CardAtomic } from "mtgjson/card_atomic";
 import { CardFace, convertAtomicCardFace } from "./card_face";
-import { Layout, normalizeCardLayout } from "./card_layout";
+import { normalizeCardLayout } from "./card_layout";
 import { ColourIdentity } from "./colour_identity";
 
 export interface Card {
     id:       number,
     name:     string,
     faces:    CardFace[],
-    layout:   Layout,
+    layout:   string,
     rulings:  Ruling[],
     identity: ColourIdentity,
 }
@@ -17,15 +17,22 @@ export interface Ruling {
     text: string,
 }
 
-export function convertAtomicCard(name: string, faces: CardAtomic[], id: number): Card {
+export function convertAtomicCard(name: string, faces: CardAtomic[], id: number): Card | null {
+    if (faces.findIndex(v => isFunny(v)) >= 0) {
+        return null;
+    }
+
+    const identity = ColourIdentity.tryParse(faces.flatMap(v => v.colorIdentity));
+    if (!identity) {
+        console.error("Failed to create identity: " + name);
+        return null;
+    }
+
     const rulings: Ruling[] = [];
     for(const {date, text} of (faces[0].rulings ?? [])) {
         if (!text || !date) continue;
         rulings.push({date, text});
     }
-
-    const identity = ColourIdentity.tryParse(faces.flatMap(v => v.colorIdentity));
-    if (!identity) throw new Error("Failed to create identity: " + name);
 
     return {
         id, 
@@ -35,4 +42,21 @@ export function convertAtomicCard(name: string, faces: CardAtomic[], id: number)
         identity,
         rulings,
     };
+}
+
+const funnySets = [
+    "UNH", // un-sets
+    "UST", // un-sets
+    "UGL", // un-sets
+    "UNF", // un-sets TODO UNF may have some "legal" cards... hmm...
+
+    "CMB1", // play test
+    "CMB2", // play test
+
+    "PAST", // fake cards
+    "PMIC", // fake cards
+];
+
+function isFunny(face: CardAtomic) {
+    return face.isFunny || (face.printings && !face.printings.find(v => !funnySets.includes(v)));
 }
