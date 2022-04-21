@@ -50,7 +50,17 @@
       "active": false
     },
     "allowlist": {
-      "all": true
+      "path": { 
+        "all": true 
+      },
+      "http": {
+        "all": true,
+        "request": true,
+        "scope": [
+          "https://mtgjson.com/api/v5/**",
+          "https://api.scryfall.com/**"
+        ]
+      }
     },
     "windows": [
       {
@@ -60,9 +70,6 @@
         "resizable": true,
         "fullscreen": false
       }
-    ],
-    "security": {
-      "csp": null
-    }
+    ]
   }
 }

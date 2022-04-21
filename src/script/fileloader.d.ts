@@ -10,6 +10,11 @@ declare module "*.json" {
     export default value;
 }
 
+declare module "*.json.gz" {
+    const value: string;
+    export default value;
+}
+
 declare module "*.webp" {
     const value: string;
     export default value;

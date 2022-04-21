@@ -37,11 +37,12 @@ module.exports = {
                 ],
             },
             {
-                test: /\.(png|jpe?g|gif|webp|json)$/i,
+                test: /\.(png|jpe?g|gif|webp|json|gz)$/i,
                 loader: 'file-loader',
                 type: 'javascript/auto',
                 options: {
-                    name: '[name].[ext]'
+                    name: '[name].[ext]',
+                    publicPath: "/",
                 }
             },
             {
