@@ -15,6 +15,7 @@ export function useMemoAsync<T>(callback: () => Promise<T>, deps?: any[]): [bool
             setResult([true, v, undefined]);
         }).catch(e => {
             if (req != reqCount.current) return;
+            console.error(e);
             setResult([true, undefined, e]);
         });
     }, deps ?? []);

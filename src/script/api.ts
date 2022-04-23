@@ -1,19 +1,41 @@
-import AtomicCardsJson from "assets/AtomicCards.json.gz";
-import SetListJson from "assets/SetList.json.gz";
 import { CardDatabase, convertFromMTGJSONAtomicCards } from "deckyard/types";
 
-import { SetListFile } from "./mtgjson/files";
 import { gunzip } from 'fflate';
+import { CardAtomicFile } from "mtgjson/files";
 
-export async function loadAtomicCards(): Promise<CardDatabase> {
-    return await convertFromMTGJSONAtomicCards(await uncompressJSON(await requestCardDatabase(AtomicCardsJson)));
+export async function loadAtomicCards(forceUpdate: boolean): Promise<CardDatabase> {
+    return await convertFromMTGJSONAtomicCards(await loadAtomicCardsData(DatabaseName.AtomicCards, forceUpdate));
 }
 
-export async function loadSetLists(): Promise<SetListFile> {
-    return await uncompressJSON( await (await fetch(SetListJson, {method: "GET"})).arrayBuffer());
+enum DatabaseName {
+    AtomicCards = 0,
 }
 
-async function uncompressJSON(response: ArrayBuffer) {
+async function loadAtomicCardsData(database: DatabaseName, forceUpdate: boolean): Promise<CardAtomicFile> {
+    if (window.__TAURI__) {
+        const { invoke } = await import('@tauri-apps/api');
+        const result = await invoke<string>("load_cards", { database, forceUpdate });
+        return JSON.parse(result);
+    } else {
+        const storageKey = `db_${DatabaseName[database]}`;
+
+        if (forceUpdate) localStorage.removeItem(storageKey);
+        let cached = localStorage.getItem(storageKey);
+        if (!cached) {
+            const url = `https://mtgjson.com/api/v5/${DatabaseName[database]}.json.gz`;
+            const data = await (await fetch(url, { method: "GET", cache: forceUpdate ? "reload" : "force-cache" })).arrayBuffer();
+            cached = await uncompressText(data);
+            try {
+                localStorage.setItem(storageKey, cached);
+            } catch(e) {
+                console.error("Failed to cache in local storeage." + e);
+            }
+        }
+        return JSON.parse(cached);
+    }
+}
+
+async function uncompressText(response: ArrayBuffer) {
     const data = await new Promise<Uint8Array>((resolve, reject) => { gunzip(
         new Uint8Array(response), 
         {consume: true}, 
@@ -25,22 +47,5 @@ async function uncompressJSON(response: ArrayBuffer) {
             resolve(v);
         }); 
     });
-    return JSON.parse(new TextDecoder().decode(data));
-}
-
-declare global {
-    interface Window { 
-        __TAURI__?: any; 
-    }
-}
-
-async function requestCardDatabase(path: string) {
-    if (window.__TAURI__) {
-        const { invoke } = await import('@tauri-apps/api');
-        return await invoke<ArrayBuffer>("load_cards", {
-            name: path,
-            forceUpdate: false
-        });
-    }
-    return await (await fetch(path, { method: "GET" })).arrayBuffer();
+    return new TextDecoder().decode(data);
 }

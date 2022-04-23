@@ -14,7 +14,12 @@ import { Card            } from "deckyard/types";
 import { DatabaseContext } from "deckyard/state";
 import { joinClassNames } from "util/shared";
 import { CardRulings } from "deckyard/components/CardRulings";
-import { DatabaseFilter, useDatabaseFilter } from "deckyard/filters";
+
+declare global {
+    interface Window { 
+        __TAURI__?: any; 
+    }
+}
 
 (async function() {
     const rootElem = document.getElementById("app-root");
@@ -24,7 +29,7 @@ import { DatabaseFilter, useDatabaseFilter } from "deckyard/filters";
 })();
 
 function RenderViewerPage() {
-    const [,db] = useMemoAsync(loadAtomicCards);
+    const [,db] = useMemoAsync(() => loadAtomicCards(false));
     return <DatabaseContext.Provider value={db}>
         <PanelCardViewer/>
         <PanelCardViewer/>
