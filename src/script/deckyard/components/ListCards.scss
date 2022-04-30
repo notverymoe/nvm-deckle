@@ -2,12 +2,11 @@
 
 .vlist.list-cards {
     .vlist-content {
-        border-radius: 0.5em 0 0 0.25em;
+        position: relative;
         background-color: var(--bg-panel-3);
-        box-shadow: inset black 0 0 4px 1px;
-        padding: 2px;
         box-sizing: border-box;
-
+        border: 2px var(--bg-panel-4) solid;
+        box-sizing: border-box;
 
         .card-entry, .card-group {
             &:nth-child(2) {
@@ -87,11 +86,10 @@
 }
 
 .vlist.list-cards {
-    border-radius: 0.25em;
     
     &.focused {
         .vlist-content {
-            box-shadow: inset 0 0 0 1px var(--accent-1), inset black 0 0 6px 2px;
+            border: 2px var(--accent-1) solid;
 
             .selected {
                 .card-entry, .card-group.selected {

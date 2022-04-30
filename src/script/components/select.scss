@@ -1,0 +1,41 @@
+
+@import "style/style.scss";
+
+.select {
+    @include button-theme;
+    position: relative;;
+
+    select {
+        -webkit-appearance: none;
+        appearance: none;
+        
+        position: absolute;
+        inset: 0;
+    
+        border: 1px solid var(--accent-3);
+        box-sizing: border-box;
+        background-color: transparent;
+        color: inherit;
+    
+        border-radius: 0;
+        margin: 0;
+        padding: 0 1em 0 0.25ch;
+        line-height: inherit;
+        font-family: inherit;
+        font-size: inherit;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+
+    .arrow {
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-right: 0.25ch;
+    }
+}

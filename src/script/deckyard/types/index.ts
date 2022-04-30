@@ -39,6 +39,8 @@ export async function convertFromMTGJSONAtomicCards(db: CardAtomicFile, yieldFre
         tokenize: "full"
     });
 
+    let long = "";
+
     const cards: Card[] = [];
     for(const [name, faces] of Object.entries(db.data)) {
         const card = convertAtomicCard(name, faces, cards.length);
@@ -46,6 +48,7 @@ export async function convertFromMTGJSONAtomicCards(db: CardAtomicFile, yieldFre
         cards.push(card);
 
         for(const face of card.faces){
+            if (face.name.length > long.length) long = face.name;
             for(const type of face.typesCard ) addToSet(byCardType,      type,               card);
             for(const type of face.typesSuper) addToSet(byCardTypeSuper, type,               card);
             for(const type of face.typesSub  ) addToSet(byCardTypeSub,   type.toLowerCase(), card);
@@ -58,6 +61,8 @@ export async function convertFromMTGJSONAtomicCards(db: CardAtomicFile, yieldFre
 
         if (cards.length % yieldFreq === 0) await new Promise(r => setTimeout(r)); // Cooperative-yielding
     }
+
+    console.log([long.length, long]);
 
     return new CardDatabase(
         cards,

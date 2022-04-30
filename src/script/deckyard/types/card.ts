@@ -49,6 +49,10 @@ const funnySets = [
     "UST", // un-sets
     "UGL", // un-sets
     "UNF", // un-sets TODO UNF may have some "legal" cards... hmm...
+    "UND",
+
+    "PVAN", // Vanguard
+    "PMOA", // Vanguard
 
     "CMB1", // play test
     "CMB2", // play test

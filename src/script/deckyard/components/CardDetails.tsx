@@ -3,67 +3,68 @@ import "./CardDetails.scss";
 import * as React from "react";
 
 import { CardFace, Card } from "deckyard/types";
-import { ButtonGroup, Button } from "components/button";
 import { IconManaCost } from "./IconManaSymbol";
+import { Select } from "components/select";
+import { CardImage } from "./CardImage";
+import { CardRulings } from "./CardRulings";
+import { useTrigger } from "components/hooks";
 
-export enum DetailMode {
-    Text,
-    Rulings,
-    Image,
+function useCardSelectionIndex(card: Card | null | undefined) {
+    const [, trigger] = useTrigger();
+    const data = React.useRef({ card, index: 0 });
+    if(data.current.card !== card && data.current.index > 0) {
+        data.current.index = 0;
+    }
+    data.current.card  = card;
+
+    const setState = React.useCallback((v: number) => {
+        if (data.current.index === v) return;
+        data.current.index = v;
+        trigger();
+    }, []);
+
+    return [data.current.index, setState] as const;
 }
 
-export function CardFaceButtons({card, mode, setMode, face, setFace}: {
-    card?: Card | null | undefined,
-    mode: DetailMode,
-    setMode: (v: DetailMode) => void,
-    face: number,
-    setFace: (v: number) => void,
+export function CardFaceDetails({card}: {
+    card?: Card | null,
 }) {
-    return <div className="card-face-details-buttons">
-        <ButtonGroup direction="vertical" className="card-face-buttons">
-            {card?.faces.map((v, i) => <Button 
-                key={i} 
-                text={`Part ${v.side}`} 
-                action={() => {
-                    setFace(i);
-                    setMode(DetailMode.Text);
-                }}
-                selected={mode === DetailMode.Text && i === face}
-            />)}
-        </ButtonGroup>
-        <Button
-            className="card-button-rulings"
-            text={"Rulings"}
-            action={() => setMode(DetailMode.Rulings)} 
-            selected={mode === DetailMode.Rulings}
-        />
-        <Button
-            className="card-button-image"
-            text={"Image"}
-            action={() => setMode(DetailMode.Image)} 
-            selected={mode === DetailMode.Image}
-        />
+    const [faceIdx, setFaceIdx] = useCardSelectionIndex(card);
+    const face = card?.faces[faceIdx];
+
+    return <div className="card-details">
+        <div className="row-0">
+            <Select 
+                className="name select"
+                title={face?.name}
+                value={faceIdx}
+                setValue={setFaceIdx}
+            >
+                {card && <option value={-2}>Images</option>}
+                {card && <option value={-1}>Rulings</option>}
+                {card?.faces.map((v, i) => <option key={i} value={i}>{v.name}</option>)}
+            </Select>
+            {face && face.manaCost.length > 0 && <div className="cost"><IconManaCost cost={face?.manaCost ?? []}/></div>}
+        </div>
+        {face && <CardText face={face}/>}
+        {faceIdx === -2 && <CardImage   key={card?.id} card={card}/>}
+        {faceIdx === -1 && <CardRulings key={card?.id} card={card}/>}
     </div>;
 }
 
-export function CardFaceDetails({face}: {
-    face?: CardFace,
-}) {
+function CardText({face}: {face: CardFace}) {
+
     // TODO format symbols
     const text = React.useMemo(
         () => (face?.text ?? "").split('\n').map((v,i) => <p key={i}>{v}</p>), 
         [face?.text ?? ""]
     );
 
-    return <div className="card-face-details">
-        {face && <div className="row-0">
-            <div className="name">{face?.name ?? ""}</div>
-            <div className="cost"><IconManaCost cost={face?.manaCost ?? []}/></div>
-        </div>}
-        {face && <div className="row-1">
+    return <>
+        <div className="row-1">
             <div className="type">{face?.type ?? ""}</div>
             {face?.power && <div className="stats">{face.power}/{face.toughness}</div>}
-        </div>}
-        {face && <div className="text">{text}</div>}
-    </div>;
+        </div>
+        <div className="text">{text}</div>
+    </>;
 }

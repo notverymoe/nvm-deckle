@@ -1,7 +1,6 @@
 import useResizeObserver from "@react-hook/resize-observer";
 import * as React from "react";
 import { Disposable } from "util/disposable";
-import { ReadonlyWatchValue, WatchValue } from "util/watch_value";
 
 export function useMemoAsync<T>(callback: () => Promise<T>, deps?: any[]): [boolean, T | undefined, Error | undefined] {
     const reqCount = React.useRef(0);
@@ -35,21 +34,6 @@ export function useCallbackWrapped<T extends Function>(callback: T): T {
     ref.current = callback;
     const wrapped = React.useCallback((...v: any[]) => ref.current(...v), []);
     return wrapped as unknown as T;
-}
-
-export function useWatchValue<T>(container: WatchValue<T>): [T, (v: T) => void] {
-    const [,setCount] = React.useState(0);
-    const countRef = React.useRef(0);
-    useMemoWithDispose(() => container.watch(() => setCount(++countRef.current), true), [container]);
-    const setWrapped = useCallbackWrapped((v: T) => { container.value = v; });
-    return [container.value, setWrapped]
-}
-
-export function useWatchValueReadonly<T>(container: ReadonlyWatchValue<T>) {
-    const [,setCount] = React.useState(0);
-    const countRef = React.useRef(0);
-    useMemoWithDispose(() => container.watch(() => setCount(++countRef.current), true), [container]);
-    return container.value;
 }
 
 export function useLast<T>(value: T, initial: T) {

@@ -1,6 +1,8 @@
 
 
 @mixin button-theme() {
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
     user-select: none;
     cursor: pointer;
 
@@ -19,7 +21,7 @@
 
     &:focus, &.selected { 
         outline: none; 
-        box-shadow: inset 0 0 0 1px var(--accent-1);
+        box-shadow: inset 0 0 0 0 var(--accent-1);
     }
 
     &:disabled {
@@ -27,3 +29,5 @@
         color: var(--fg-input-0);
     }
 }
+
+

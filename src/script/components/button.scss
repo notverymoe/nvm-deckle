@@ -60,7 +60,7 @@ div.button-group {
     flex-wrap: nowrap;
     
     height: max-content;
-    width: max-content;
+    min-width: max-content;
     
 
     > .button-spacer {

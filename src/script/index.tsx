@@ -5,21 +5,20 @@ import "./index.scss";
 import * as React from "react";
 import { createRoot } from "react-dom/client";
 
-import { useLast, useMemoAsync    } from "components/hooks";
+import { useMemoAsync    } from "components/hooks";
 import { loadAtomicCards } from "api";
-import { CardListRaw, ListCard, useCollapseTracker    } from "deckyard/components/ListCards";
-import { CardFaceButtons, CardFaceDetails, DetailMode } from "deckyard/components/CardDetails";
-import { CardImage       } from "deckyard/components/CardImage";
+import { CardListRaw, ListCard, useCollapseTracker } from "deckyard/components/ListCards";
+import { CardFaceDetails as CardDetails            } from "deckyard/components/CardDetails";
 import { Card            } from "deckyard/types";
 import { DatabaseContext } from "deckyard/state";
-import { joinClassNames } from "util/shared";
-import { CardRulings } from "deckyard/components/CardRulings";
+import { joinClassNames  } from "util/shared";
 
 declare global {
     interface Window { 
         __TAURI__?: any; 
     }
 }
+
 
 (async function() {
     const rootElem = document.getElementById("app-root");
@@ -30,10 +29,12 @@ declare global {
 
 function RenderViewerPage() {
     const [,db] = useMemoAsync(() => loadAtomicCards(false));
-    return <DatabaseContext.Provider value={db}>
-        <PanelCardViewer/>
-        <PanelCardViewer/>
-    </DatabaseContext.Provider>;
+    return <React.StrictMode>
+        <DatabaseContext.Provider value={db}>
+            <PanelCardViewer/>
+            <PanelCardViewer/>
+        </DatabaseContext.Provider>
+    </React.StrictMode>;
 }
 
 function PanelCardViewer({className}: {
@@ -71,38 +72,9 @@ function PanelCardViewer({className}: {
                 getCollapsed={getCollapsed}
                 setCollapsed={setCollapsed}
             />
-            <div className="preview">
-                <PanelCardDetails card={selection}/>
+            <div className="details">
+                <CardDetails card={selection}/>
             </div>
         </div>
     </div>;
-}
-
-function PanelCardDetails({card}: {card?: Card | null | undefined}) {
-    const lastCard = useLast(card, card);
-    const [mode,    setMode] = React.useState(DetailMode.Text);
-    const [faceRaw, setFace] = React.useState(0);
-
-    const face = card !== lastCard ? 0 : faceRaw;
-    React.useEffect(() => setFace(0), [card]);
-
-    let displayed;
-    switch(mode) {
-        case DetailMode.Image:   { displayed = <CardImage       key={card?.id} card={card}             />; } break;
-        case DetailMode.Rulings: { displayed = <CardRulings     key={card?.id} card={card}             />; } break;
-        case DetailMode.Text:    { displayed = <CardFaceDetails key={card?.id} face={card?.faces[face]}/>; } break;
-    }
-
-    return <>
-        <div className="details">{displayed}</div>
-        <div className="buttons">
-            <CardFaceButtons 
-                card    = {card} 
-                face    = {face}
-                setFace = {setFace}
-                mode    = {mode}
-                setMode = {setMode}
-            />
-        </div>
-    </>;
 }
