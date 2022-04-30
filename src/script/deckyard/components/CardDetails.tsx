@@ -39,12 +39,27 @@ export function CardFaceDetails({card}: {
                 title={face?.name}
                 value={faceIdx}
                 setValue={setFaceIdx}
+                Overlay={({value}) => {
+                    if (value === -2) return <div className="name">Image</div>;
+                    if (value === -1) return <div className="name">Rulings</div>;
+
+                    const face = card?.faces[value];
+                    if (!face) return <></>;
+
+                    return <>
+                        <div className="name">{face.name ?? ""}</div>
+                        <div className="cost"><IconManaCost cost={face?.manaCost ?? []}/></div>
+                    </>;
+                }}
             >
-                {card && <option value={-2}>Images</option>}
-                {card && <option value={-1}>Rulings</option>}
-                {card?.faces.map((v, i) => <option key={i} value={i}>{v.name}</option>)}
+                {card && <>
+                    <option value={-2}>Images</option>
+                    <option value={-1}>Rulings</option>
+                    <optgroup label="Faces">
+                        {card.faces.map((v, i) => <option key={i} value={i}>{v.name}</option>)}
+                    </optgroup>
+                </>}
             </Select>
-            {face && face.manaCost.length > 0 && <div className="cost"><IconManaCost cost={face?.manaCost ?? []}/></div>}
         </div>
         {face && <CardText face={face}/>}
         {faceIdx === -2 && <CardImage   key={card?.id} card={card}/>}

@@ -3,39 +3,48 @@
 
 .select {
     @include button-theme;
-    position: relative;;
+
+
+    overflow: hidden;
+
+    display: grid;
+    grid-template-columns: 1fr 1.5em;
+    grid-template-rows: auto;
+    grid-template-areas: 'label arrow';
+    border: 1px solid var(--accent-3);
+    padding: 0 0.25ch;
+    gap: 0.25ch;
+
+    align-items: center;
+    justify-content: center;
 
     select {
-        -webkit-appearance: none;
-        appearance: none;
-        
         position: absolute;
-        inset: 0;
-    
-        border: 1px solid var(--accent-3);
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+
         box-sizing: border-box;
-        background-color: transparent;
-        color: inherit;
-    
-        border-radius: 0;
+        opacity: 0;
         margin: 0;
-        padding: 0 1em 0 0.25ch;
-        line-height: inherit;
-        font-family: inherit;
-        font-size: inherit;
-        text-overflow: ellipsis;
+        padding: 0;
+        border: 0;
+    }
+
+    .overlay {
+        grid-area: label;
+
+        display: flex;
+        flex-direction: row;
         overflow: hidden;
     }
 
     .arrow {
-        position: absolute;
-        right: 0;
-        top: 0;
-        bottom: 0;
+        grid-area: arrow;
 
         display: flex;
         align-items: center;
         justify-content: center;
-        padding-right: 0.25ch;
     }
 }

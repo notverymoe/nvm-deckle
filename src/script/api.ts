@@ -4,14 +4,14 @@ import { gunzip } from 'fflate';
 import { CardAtomicFile } from "mtgjson/files";
 
 export async function loadAtomicCards(forceUpdate: boolean): Promise<CardDatabase> {
-    return await convertFromMTGJSONAtomicCards(await loadAtomicCardsData(DatabaseName.AtomicCards, forceUpdate));
+    return await convertFromMTGJSONAtomicCards(await loadAtomicCardsData(DatabaseName.AtomicCards, forceUpdate, true));
 }
 
 enum DatabaseName {
     AtomicCards = 0,
 }
 
-async function loadAtomicCardsData(database: DatabaseName, forceUpdate: boolean): Promise<CardAtomicFile> {
+async function loadAtomicCardsData(database: DatabaseName, forceUpdate: boolean, forceDev: boolean): Promise<CardAtomicFile> {
     if (window.__TAURI__) {
         const { invoke } = await import('@tauri-apps/api');
         const result = await invoke<string>("load_cards", { database, forceUpdate });
@@ -22,9 +22,14 @@ async function loadAtomicCardsData(database: DatabaseName, forceUpdate: boolean)
         if (forceUpdate) localStorage.removeItem(storageKey);
         let cached = localStorage.getItem(storageKey);
         if (!cached) {
-            const url = `https://mtgjson.com/api/v5/${DatabaseName[database]}.json.gz`;
-            const data = await (await fetch(url, { method: "GET", cache: forceUpdate ? "reload" : "force-cache" })).arrayBuffer();
-            cached = await uncompressText(data);
+            if (!forceDev) {
+                const url = `https://mtgjson.com/api/v5/${DatabaseName[database]}.json.gz`;
+                const data = await (await fetch(url, { method: "GET", cache: forceUpdate ? "reload" : "force-cache" })).arrayBuffer();
+                cached = await uncompressText(data);
+            } else {
+                const url = `http://localhost:8000/database/${DatabaseName[database]}?force_update=${forceUpdate}`;
+                cached = await (await fetch(url)).text();
+            }
             try {
                 localStorage.setItem(storageKey, cached);
             } catch(e) {

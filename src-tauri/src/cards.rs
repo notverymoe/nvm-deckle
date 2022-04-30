@@ -11,13 +11,27 @@ pub async fn load_cards(
     database: u32, 
     force_update: bool
 ) -> Result<String, String> {
-    let name = try_get_db_name(database);
-    if name.is_none() { return Err("Invalid DB".into()); }
-    let name = name.unwrap();
+    match (try_get_db_name(database), app_dir(&window.config())) {
+        (Some(n), Some(v)) => do_load_cards(n, &v, force_update).await,
+        _    => Err("Failed to get database".to_owned()), 
+    }
+    
+}
+
+pub async fn do_load_cards(
+    name: &str,
+    root: &PathBuf,
+    force_update: bool
+) -> Result<String, String> {
+
+    let paths = match get_database_paths(root, name) {
+        Some(v) => v,
+        None    => return Err("Failed to get databae path".to_owned()),
+    };
 
     let data = match force_update {
-        true => Err("".into()),
-        false=> load_cards_from_disk(&window.config(), name),
+        true  => Err("".into()),
+        false => load_cards_from_disk(&paths),
     };
 
     if let Ok(data) = data {
@@ -30,7 +44,7 @@ pub async fn load_cards(
 
     match load_cards_from_mtgjson(name).await {
         Ok(data) => {
-            if let Err(e) = write_cards_to_disk(&window.config(), name, &data) {
+            if let Err(e) = write_cards_to_disk(&paths, &data) {
                 eprintln!("Failed to write file: {}", e)
             }
             Ok(unsafe{ String::from_utf8_unchecked(data) } )
@@ -49,15 +63,14 @@ fn try_get_db_name(id: u32) -> Option<&'static str> {
     }
 }
 
-fn load_cards_from_disk(config: &tauri::Config, name: &str) -> Result<Vec<u8>, String> {
-    let (_root, path) = get_database_paths(config, name).unwrap();
-    std::fs::read(path).map_err(|e| e.to_string())
+fn load_cards_from_disk(paths: &DatabasePaths) -> Result<Vec<u8>, String> {
+    std::fs::read(&paths.path).map_err(|e| e.to_string())
 }
 
-fn write_cards_to_disk(config: &tauri::Config, name: &str, data: &Vec<u8>) -> std::io::Result<()> {
-    let (root, path) = get_database_paths(config, name).unwrap();
+fn write_cards_to_disk(paths: &DatabasePaths, data: &Vec<u8>) -> std::io::Result<()> {
+    let DatabasePaths{root, path} = paths;
     std::fs::create_dir_all(root)?;
-    std::fs::write(&path, data)?;
+    std::fs::write(path, data)?;
     Ok(())
 }
 
@@ -84,8 +97,13 @@ fn decompress_xz(source: &Vec<u8>) -> Result<Vec<u8>, lzma_rs::error::Error> {
     lzma_rs::xz_decompress(&mut source, &mut result).map(|_| result)
 }
 
-fn get_database_paths(config: &tauri::Config, name: &str) -> Option<(PathBuf, PathBuf)> {
-    let root = app_dir(config)?;
+struct DatabasePaths {
+    root: PathBuf,
+    path: PathBuf,
+}
+
+fn get_database_paths(dir: &PathBuf, name: &str) -> Option<DatabasePaths> {
+    let root = dir.to_owned();
     let path = root.join("database/").join(&name).with_extension("json");
-    Some((root, path))
+    Some(DatabasePaths{root, path})
 }

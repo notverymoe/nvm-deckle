@@ -60,7 +60,6 @@ function PanelCardViewer({className}: {
 
     return <div className={joinClassNames("panel-card-viewer-container", className)}>
         <div className="panel-card-viewer">
-            <div className="tools">Top</div>
             <ListCard
                 cards={cards}
                 selected={selected} 
