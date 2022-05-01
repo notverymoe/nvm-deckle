@@ -11,7 +11,7 @@ enum DatabaseName {
     AtomicCards = 0,
 }
 
-async function loadAtomicCardsData(database: DatabaseName, forceUpdate: boolean, forceDev: boolean): Promise<CardAtomicFile> {
+async function loadAtomicCardsData(database: DatabaseName, forceUpdate: boolean, forceDev?: boolean): Promise<CardAtomicFile> {
     if (window.__TAURI__) {
         const { invoke } = await import('@tauri-apps/api');
         const result = await invoke<string>("load_cards", { database, forceUpdate });

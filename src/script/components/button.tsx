@@ -54,7 +54,7 @@ export function Button({icon: Icon, selected, disabledTitle, text, title, action
             action?.();
         }}
         onClick={e => {
-            if (e.button !== 0) return;
+            if (e.button !== 0 || (!repeat && e.detail <= 0)) return;
             action?.();
         }}
         onSelect={e => {
@@ -65,10 +65,9 @@ export function Button({icon: Icon, selected, disabledTitle, text, title, action
         ref={refElem}
         disabled={disabled}
     >
-        {Icon && <Icon 
-            className="button-icon"
-            style={iconRotate ? {transform: `rotate(${iconRotate*90}deg)`} : undefined}
-        />}
+        {Icon && <div className="button-icon" style={iconRotate ? {transform: `rotate(${iconRotate*90}deg)`} : undefined}>
+            <Icon/>
+        </div>}
         {text && <div
             className="button-text"
         >{text}</div>}

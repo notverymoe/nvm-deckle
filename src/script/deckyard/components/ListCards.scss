@@ -1,6 +1,7 @@
 
 
 .vlist.list-cards {
+
     .vlist-content {
         position: relative;
         background-color: var(--bg-panel-3);
@@ -8,11 +9,9 @@
         border: 2px var(--bg-panel-4) solid;
         box-sizing: border-box;
 
-        .card-entry, .card-group {
-            &:nth-child(2) {
-                border-radius: 0.5em 0 0 0;
-            }
+        --entry-bg: var(--bg-panel-3);
 
+        .card-entry, .card-group {
             overflow: hidden;
             padding: 0 0.25em;
             gap: 0.25em;
@@ -21,16 +20,41 @@
 
             display: flex;
             align-items: center;
-
-            -moz-user-select: none;
-            -webkit-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
             
             cursor: pointer;
         }
 
+        .card-group {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+
+            .name {
+                flex: 1 1;
+            }
+
+            .arrow {
+                width: 1em;
+                height: 1em;
+
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+
+                transform: rotate(0deg);
+                transition: 0.15s transform ease-in-out;;
+            }
+
+            &.collapsed {
+                .arrow {
+                    transform: rotate(-90deg);
+                }
+            }
+        }
+
         .card-entry {
+            position: relative;
 
             .card-qty {
                 width: 2ch;
@@ -69,10 +93,52 @@
                 grid-auto-flow: column;
                 justify-content: center;
                 align-items: center;
+                opacity: 1;
+                transition: 0.2s opacity ease-in-out;
 
                 > * {
                     width: 1em;
                     height: 1em;
+                }
+            }
+
+            .card-overlay:hover + .card-cost, .card-overlay.hover + .card-cost {
+                opacity: 0;
+            }
+
+            .card-overlay {
+                z-index: 1;
+                position: absolute;
+                right: 0;
+                top: 0;
+                bottom: 0;
+                opacity: 0;
+                pointer-events: auto;
+                transition: 0.2s opacity ease-in-out;
+                gap: 0.5ch;
+
+                padding: 0 0.5ch;
+
+                background-color: var(--entry-bg);
+                margin: 1px;
+
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+                
+                &:hover, &.hover {
+                    opacity: 1.0;
+                    pointer-events: unset;
+                };
+
+                .button {
+                    height: 1em;
+                    width: 1em;
+
+                    .button-icon {
+                        --icon-size: 0.75em;
+                    }
                 }
             }
         }
@@ -95,6 +161,7 @@
                 .card-entry, .card-group.selected {
                     box-shadow: inset 0 0 0 1px var(--accent-1), 0 0 4px 1px black;
                     background-color: var(--bg-input-0);
+                    --entry-bg: var(--bg-input-0);
                 }
             }
         }

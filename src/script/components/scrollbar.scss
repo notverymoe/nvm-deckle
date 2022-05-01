@@ -11,13 +11,13 @@ $scrollbar-size: 1em;
     border-radius: 0.25em;
     
     .button, .button .button-icon {
-        width:  $scrollbar-size;
+        width:      $scrollbar-size;
         min-width:  $scrollbar-size;
         max-width:  $scrollbar-size;
-        height: $scrollbar-size;
+        height:     $scrollbar-size;
         min-height: $scrollbar-size;
         max-height: $scrollbar-size;
-        * { fill: var(--accent-3); stroke: var(--accent-3); }
+        --icon-size: calc(#{$scrollbar-size}*0.75);
     }
 
     .scrollbar-inner {
@@ -40,7 +40,10 @@ $scrollbar-size: 1em;
                 align-items: center;
                 justify-content: center;
                 > .button {
-                    border-radius: 0;
+                    border-radius: 0.125em;;
+                    height:     calc(#{$scrollbar-size}*3 - 1px);
+                    min-height: calc(#{$scrollbar-size}*3 - 1px);
+                    max-height: calc(#{$scrollbar-size}*3 - 1px);
                 }
             }
         }
@@ -60,11 +63,11 @@ $scrollbar-size: 1em;
 
             > .button {
                 &:first-child {
-                    margin-bottom: math.div($scrollbar-size, 2);
+                    margin-bottom: calc(#{$scrollbar-size}*1.5 + 0.5px);
                     border-radius: 0.25em 0.25em 0 0;
                 }
                 &:last-child {
-                    margin-top: math.div($scrollbar-size, 2);
+                    margin-top: calc(#{$scrollbar-size}*1.5 + 0.5px);
                     border-radius: 0 0 0.25em 0.25em;
                 }
             }

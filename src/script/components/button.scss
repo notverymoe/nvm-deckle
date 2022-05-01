@@ -17,7 +17,7 @@ $border-radius: 0.25rem;
 
     box-sizing: border-box;
     margin: 0;
-    padding: 0;
+    padding: 2px;
     min-height: 1em;
     min-width:  1em;
     line-height: 1;
@@ -34,19 +34,33 @@ $border-radius: 0.25rem;
     @include button-theme;
 
     .button-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
         box-sizing: border-box;
-        margin: 2px;
 
-        width: 2em;
-        height: 2em;
+        min-width: 2em;
+        min-height: 2em;
+
         max-width: 2em;
         max-height: 2em;
 
-        > * { 
-            width: 100%; 
-            height: 100%; 
-            * { fill: var(--fg-panel-1); stroke: var(--fg-panel-1); }
+        --icon-size: 1.25em;
+        
+        &, > * {
+            min-width:  var(--icon-size);
+            max-width:  var(--icon-size);
+            min-height: var(--icon-size);
+            max-height: var(--icon-size);
+            width:  var(--icon-size);
+            height: var(--icon-size);
+            * { fill: var(--accent-3); stroke: var(--accent-3); }
         }
+    }
+
+    &:disabled .button-icon * {
+        fill:   var(--fg-input-0);
+        stroke: var(--fg-input-0);
     }
 
     .button-text {

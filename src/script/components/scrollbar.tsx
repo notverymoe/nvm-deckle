@@ -4,8 +4,8 @@ import * as React from "react";
 import { Button } from "./button";
 import { useRef } from "react";
 
-import IconArrow from "assets/icons/arrow.svg";
-import IconMenu  from "assets/icons/menu.svg";
+import IconArrow from "assets/icons/mui_play_arrow.svg";
+import IconMenu  from "assets/icons/mui_menu.svg";
 import { joinClassNames } from "util/shared";
 
 export function ScrollBar({direction, value, setValue, valueMax, step, panRate, scrollRate, className}: {

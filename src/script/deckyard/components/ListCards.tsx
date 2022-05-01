@@ -5,11 +5,15 @@ import * as React from "react";
 
 import { useRangeVirtual, useTrigger } from "components/hooks";
 import { VList           } from "components/vlist";
-import { DatabaseContext } from "../state";
-import { Card } from "../types";
+import { Card            } from "../types";
 import { IconCardType    } from "./IconCardType";
 import { IconManaCostSet } from "./IconManaSymbol";
-import { DatabaseFilter, useDatabaseFilter } from "deckyard/filters";
+import { joinClassNames  } from "util/shared";
+
+import MUIArrow  from "assets/icons/mui_play_arrow.svg";
+import MUIAdd    from "assets/icons/mui_add.svg";
+import MUIRemove from "assets/icons/mui_remove.svg";
+import { Button, ButtonGroup } from "components/button";
 
 const selectionContext = React.createContext<{selected: number, setSelected: (idx: number, card: Card) => void} | null>(null);;
 
@@ -33,7 +37,9 @@ export interface CardListMetadata {
     groups: CardGroup<CardWithMetadata>[];
 }
 
-export function useCollapseTracker(cards: CardListRaw | CardListMetadata, defaultState: boolean = false) {
+export type CardList = CardListRaw | CardListMetadata;
+
+export function useCollapseTracker(cards: CardList, defaultState: boolean = false) {
 
     const [collapseTrigger, fireCollapseTrigger] = useTrigger();
     const [   resetTrigger, fireResetTrigger   ] = useTrigger();
@@ -65,14 +71,18 @@ export function useCollapseTracker(cards: CardListRaw | CardListMetadata, defaul
     ] as const;
 }
 
-export function ListCard({selected, setSelected, cards, getCollapsed, setCollapsed, collapseTrigger}: {
+export function ListCard({selected, setSelected, cards, getCollapsed, setCollapsed, collapseTrigger, move, add}: {
+    cards: CardList,
+
     selected:    number,
     setSelected: (v: number, c: Card | null) => void,
-    cards: CardListRaw | CardListMetadata,
 
     getCollapsed: (v: number) => boolean,
     setCollapsed: (v: number, state: boolean) => void,
     collapseTrigger: number,
+
+    move?: (v: number) => void,
+    add?:  (v: number) => void,
 }) {
     const [count,     setCount    ] = React.useState(0);
     const [offset,    setOffsetRaw] = React.useState(0);
@@ -87,6 +97,10 @@ export function ListCard({selected, setSelected, cards, getCollapsed, setCollaps
 
     const cardsShown = useRangeVirtual(
         (i, length) => {
+            if (cards.groups.length <= 0) {
+                return [];
+            }
+
             // TODO this is horrid
             let offset = 0;
             const startGroup = cards.groups.findIndex((v, j) => {
@@ -99,11 +113,19 @@ export function ListCard({selected, setSelected, cards, getCollapsed, setCollaps
             let result: JSX.Element[] = [];
             for(let j = startGroup; j < cards.groups.length && result.length < length; j++) {
                 if (skip === 0) {
+                    let count;
+                    if (cards.hasMetadata) {
+                        count = cards.groups[j].contents.reduce((p, c) => p + c.qty, 0);
+                    } else {
+                        count = cards.groups[j].contents.length;
+                    }
+
                     result.push(<ListCardGroup
                         key={i + result.length}
                         name={cards.groups[j].name}
                         collapsed={getCollapsed(j)}
                         toggle={() => setCollapsed(j, !getCollapsed(j))}
+                        count={count}
                     />);
                 } else {
                     skip -= 1;
@@ -158,17 +180,49 @@ export function ListCard({selected, setSelected, cards, getCollapsed, setCollaps
     </selectionContext.Provider>;
 }
 
-export function ListCardEntry({qty, card}: {qty?: number, card: Card}) {
+export function ListCardEntry({qty, card, move, add}: {
+    qty?: number,
+    card: Card, 
+    move?: (v: number) => void,
+    add?:  (v: number) => void,
+}) {
+    const [toggleControls, setToggleControls] = React.useState(false);
+    const [controlRef, setControlRef] = React.useState<HTMLDivElement | null>(null);
+
+    React.useEffect(() => {
+        if (!(move || add) || !toggleControls || !controlRef) return;
+        const cb = (e: MouseEvent) => {
+            if (controlRef?.contains(e.target as Node) ?? true) return;
+            setToggleControls(false);
+        };
+        document.addEventListener("mousedown", cb);
+        return () => document.removeEventListener("mousedown", cb)
+    }, [move, add, toggleControls, controlRef]);
+    
     return <div className="card-entry" title={card.name}>
         {qty && <div className="card-qty" title={`x${qty}`}>{qty}</div>}
         <div className="card-type"><IconCardType card={card}/></div>
         <div className="card-name">{card.name}</div>
-        <div className="card-cost"><IconManaCostSet costs={card.faces.map(v => v.manaCost)}/></div>
+        {(move || add) && <div className={joinClassNames("card-overlay", toggleControls && "hover")} ref={setControlRef}>
+            {add && <ButtonGroup direction="horizontal">
+                <Button icon={MUIAdd}    action={() => add( 1)}/>
+                <Button icon={MUIRemove} action={() => add(-1)}/>
+            </ButtonGroup>}
+            {move && <ButtonGroup direction="horizontal">
+                <Button icon={MUIArrow} iconRotate={3} action={() => move(-1)}/>
+                <Button icon={MUIArrow} iconRotate={1} action={() => move( 1)}/>
+            </ButtonGroup>}
+        </div>}
+        <div className="card-cost" onClick={() => setToggleControls(!toggleControls)}>
+            <IconManaCostSet costs={card.faces.map(v => v.manaCost)}/>
+        </div>
     </div>
 }
 
-export function ListCardGroup({name, toggle}: {name: string, collapsed: boolean, toggle: () => void}) {
-    return <div className="card-group" onClick={toggle}>
+export function ListCardGroup({name, collapsed, toggle, count}: {name: string, collapsed: boolean, toggle: () => void, count: number}) {
+    return <div className={joinClassNames("card-group", collapsed && "collapsed")} onClick={toggle}>
         <div className="name">{name}</div>
+        <div className="count">{count}</div>
+        <div className="arrow">{"▼"}</div>
     </div>;
 }

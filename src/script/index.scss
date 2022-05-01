@@ -16,8 +16,75 @@
             display: flex;
             flex-direction: column;
 
-            .list-cards {
+            .list {
+                display: flex;
+                flex-direction: row;
                 flex: 1 1;
+
+                .tools {
+                    position: relative;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.5ch;
+                    padding-left: 0.5ch;
+                    width: 1.75em;
+
+                    .button-send {
+                        display: grid;
+                        > * {
+                            grid-column: 1;
+                            grid-row: 1;
+                        }
+                        .button-text {
+                            position: relative;
+                            top:  20%;
+                            left: 20%;
+                            color: var(--fg-panel-0);
+                            font-size: 0.75em;
+                            font-weight: bolder;
+                            text-shadow:
+                             -1px -1px 0 #000,  
+                              1px -1px 0 #000,
+                              -1px 1px 0 #000,
+                               1px 1px 0 #000;
+                        }
+                    }
+                    
+                    .button {
+                        height: 1.75em;
+                        width: 1.75em;
+                    }
+    
+                    > * {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.5ch;
+                        > .button {
+                            border-radius: 0.25em 0 0 0.25em;
+                        }
+                    }
+
+                    .group-middle {
+                        position: relative;
+                        top: calc(max(0%, 50% - 1.5*(5*1.75em + 1ch)));
+
+                    }
+    
+                    .button-group > .button {
+                        &:first-child { border-radius: 0.25em 0 0 0;      }
+                        &:last-child  { border-radius: 0      0 0 0.25em; }
+                    }
+                }
+
+                .vlist-container {
+                    flex: 1 1;
+                    position: relative;
+
+                    > * {
+                        position: absolute;
+                        inset: 0;
+                    }
+                }
             }
 
             .details {

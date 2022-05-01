@@ -39,7 +39,7 @@ export class Observable<T> {
     set value(next: T) {
         let value = this._value;
         this._value = next;
-        if (this.equals(next, value)) this.notify(next, value)
+        if (!this.equals(next, value)) this.notify(next, value)
     }
 
     get value() {
@@ -74,7 +74,7 @@ export function useObservableTrigger<T>(obserable: Observable<T> | undefined | n
 }
 
 export function useObservableReadonly<T>(obserable: Observable<T>) {
-    useObservable(obserable);
+    useObservableTrigger(obserable);
     return obserable.value;
 }
 
