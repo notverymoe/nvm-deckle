@@ -81,8 +81,8 @@ export function ListCard({selected, setSelected, cards, getCollapsed, setCollaps
     setCollapsed: (v: number, state: boolean) => void,
     collapseTrigger: number,
 
-    move?: (v: number) => void,
-    add?:  (v: number) => void,
+    move?: (card: Card, v: number) => void,
+    add?:  (card: Card, v: number) => void,
 }) {
     const [count,     setCount    ] = React.useState(0);
     const [offset,    setOffsetRaw] = React.useState(0);
@@ -139,6 +139,8 @@ export function ListCard({selected, setSelected, cards, getCollapsed, setCollaps
                                 key={i + result.length}
                                 qty ={contents[k].qty }
                                 card={contents[k].card}
+                                move={move ? v => move(contents[k].card, v) : undefined}
+                                add ={add ?  v =>  add(contents[k].card, v) : undefined}
                             />);
                         }
                     } else {

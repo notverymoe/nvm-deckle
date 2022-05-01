@@ -6,7 +6,7 @@ import * as React from "react";
 import { createRoot } from "react-dom/client";
 
 import { loadAtomicCards } from "api";
-import { CardList, CardListMetadata, ListCard, useCollapseTracker } from "deckyard/components/ListCards";
+import { CardList, CardListMetadata, CardWithMetadata, ListCard, useCollapseTracker } from "deckyard/components/ListCards";
 import { CardFaceDetails as CardDetails            } from "deckyard/components/CardDetails";
 import { Card, CardDatabase            } from "deckyard/types";
 import { joinClassNames  } from "util/shared";
@@ -53,12 +53,51 @@ function PanelCardViewer({className}: {
     const [selection, setSelection] = React.useState<Card | null>(null);
 
     const [current, setCurrent] = React.useState("all");
-    let database = useObservableReadonly(LIST_DATABASE);
+    const database = useObservableReadonly(LIST_DATABASE);
 
-    const cards = React.useMemo<CardList>(() => {
-        if (!database) return {groups: [{name: "Loading...", contents: []}]};
-        return {groups: [{name: "Database", contents: database.cards}]};
-    }, [database]);
+    const currentObservable = 
+        current === "misc" ? LIST_CONSIDER :
+        current === "side" ? LIST_SIDE     :
+        LIST_MAIN;
+    const currentList = useObservableReadonly(currentObservable);
+
+    const send = (dest: Observable<CardWithMetadata[]>) => {
+        if (selection === null) return;
+        let database = dest.value.map(v => ({...v}));
+        let idx = database.findIndex(v => v.card.id === selection.id);
+        if (idx >= 0) {
+            database[idx].qty++;
+        } else {
+            database.push({qty: 1, card: selection});
+        }
+        dest.value = database;
+    };
+
+    const move = (dest: Observable<CardWithMetadata[]>, card: Card, dist: number) => {
+        let idx = dest.value.findIndex(v => v.card.id === card.id);
+        if (idx < 0) return;
+        const newPos = Math.min(Math.max(idx+dist, 0), dest.value.length);
+        if (idx === newPos) return;
+
+        let database = dest.value.map(v => ({...v}));
+        const value = database[idx];
+        database.splice(idx, 1);
+        database.splice(newPos, 0, value);
+        dest.value = database;
+
+        setSelected(newPos);
+    };
+
+    const add = (dest: Observable<CardWithMetadata[]>, card: Card, amount: number) => {
+        let idx = dest.value.findIndex(v => v.card.id === card.id);
+        if (idx < 0) return;
+
+        let database = dest.value.map(v => ({...v}));
+        database[idx].qty += amount;
+        if (database[idx].qty <= 0) database.splice(idx, 1);
+        dest.value = database;
+    };
+
 
     return <div className={joinClassNames("panel-card-viewer-container", className)}>
         <div className="panel-card-viewer">
@@ -75,13 +114,23 @@ function PanelCardViewer({className}: {
                     </div>
                     <div className="group-middle">
                         <ButtonGroup direction="vertical">
-                            <Button title="Send" icon={MUISend} text="M" className="button-send"/>
-                            <Button title="Send" icon={MUISend} text="S" className="button-send"/>
-                            <Button title="Send" icon={MUISend} text="C" className="button-send"/>
+                            <Button title="Send" icon={MUISend} text="M" className="button-send" action={() => send(LIST_MAIN)}/>
+                            <Button title="Send" icon={MUISend} text="S" className="button-send" action={() => send(LIST_SIDE)}/>
+                            <Button title="Send" icon={MUISend} text="C" className="button-send" action={() => send(LIST_CONSIDER)}/>
                         </ButtonGroup>
                     </div>
                 </div>
-                <DeckList cards={cards} selected={selected} setSelected={setSelected} setSelection={setSelection}/>
+                <DeckList 
+                    cards={current === "all" 
+                        ? (database?.cards ?? null) 
+                        : currentList
+                    }
+                    selected={selected}
+                    setSelected={setSelected}
+                    setSelection={setSelection}
+                    move={current === "all" ? undefined : (card: Card, dist: number) => move(currentObservable, card, dist)}
+                    add ={current === "all" ? undefined : (card: Card, amt:  number) => add(currentObservable, card, amt)}
+                />
             </div>
             <div className="details">
                 <CardDetails card={selection}/>
@@ -90,16 +139,29 @@ function PanelCardViewer({className}: {
     </div>;
 }
 
-function DeckList({cards, selected, setSelected, setSelection}: {
-    cards: CardList,
+function DeckList({cards, selected, setSelected, setSelection, move, add}: {
+    cards: CardWithMetadata[] | Card[] | null,
     selected: number,
     setSelected: (v: number) => void,
     setSelection: (v: Card | null) => void,
+    move?: (card: Card, dist: number) => void,
+    add?:  (card: Card, count: number) => void,
 }) {
-    const [collapseTrigger, getCollapsed, setCollapsed] = useCollapseTracker(cards, false);
+    const cardList = React.useMemo<CardList>((): CardList => {
+        if (!cards) return {groups: [{name: "Loading...", contents: []}]};
+        return (!!cards.length && !("qty" in cards[0])) ? {
+            groups: [{name: "Contents", contents: cards as Card[]}], 
+            hasMetadata: false
+        } : {
+            groups: [{name: "Contents", contents: cards as CardWithMetadata[]}], 
+            hasMetadata: true
+        };
+    }, [cards]);
+
+    const [collapseTrigger, getCollapsed, setCollapsed] = useCollapseTracker(cardList, false);
     return <div className="vlist-container">
         <ListCard
-            cards={cards}
+            cards={cardList}
             selected={selected} 
             setSelected={(id, card) => {
                 setSelected(id);
@@ -108,6 +170,8 @@ function DeckList({cards, selected, setSelected, setSelection}: {
             collapseTrigger={collapseTrigger}
             getCollapsed={getCollapsed}
             setCollapsed={setCollapsed}
+            move={move}
+            add={add}
         />
     </div>;
 }

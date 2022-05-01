@@ -79,7 +79,7 @@ export function useObservableReadonly<T>(obserable: Observable<T>) {
 }
 
 export function useObservable<T>(obserable: Observable<T>) {
-    useObservable(obserable);
+    useObservableTrigger(obserable);
 
     const observableRef = useRef(obserable);
     observableRef.current = obserable;
