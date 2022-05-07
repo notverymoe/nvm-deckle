@@ -1,85 +1,45 @@
-import { useTrigger } from "components/hooks";
-import { useCallback, useEffect, useRef } from "react";
-import { Disposable, DisposeGuard } from "./disposable";
+import { useCallback, useRef } from "react";
+import { Disposable } from "./disposable";
+import { MessageCallback, MessageSource, useMessageTrigger } from "./message";
 
-
-export type ObservableChanged<T> = (current: T, old: T) => void;
-
-export class Observable<T> {
-
-    private listeners: ObservableChanged<T>[] = [];
-    private reentry = 0;
+export class Observable<T> extends MessageSource<[T, T]> {
 
     constructor(
         private _value: T,
         private equals: (a: T, b: T) => boolean = (a, b) => a === b,
-    ) {}
+    ) {
+        super();
+    }
 
-    connect(listener: ObservableChanged<T>, skipInitial?: boolean): Disposable {
+    connect(listener: MessageCallback<[T, T]>, skipInitial?: boolean): Disposable {
+        const result = super.connect(listener);
         if (!skipInitial) listener(this._value, this._value);
-        this.listeners.push(listener);
-        return new DisposeGuard(() => this.disconnect(listener));
-    }
-
-    disconnect(listener: ObservableChanged<T>): boolean {
-        const idx = this.listeners.indexOf(listener);
-        if (idx < 0) return false;
-        this.listeners.splice(idx, 1);
-        return true;
-    }
-
-    clear() {
-        this.listeners.length = 0;
+        return result;
     }
 
     refresh() {
-        this.notify(this._value, this._value);
+        this._notify(this._value, this._value);
     }
 
     set value(next: T) {
         let value = this._value;
         this._value = next;
-        if (!this.equals(next, value)) this.notify(next, value)
+        if (!this.equals(next, value)) this._notify(next, value);
     }
 
     get value() {
         return this._value;
     }
 
-    private notify(next: T, prev: T) {
-        if (this.reentry) console.warn("Attempt to re-enter obserable::notify");
-        this.reentry++;
-
-        for(const listener of [...this.listeners]) {
-            try {
-                listener(next, prev);
-            } catch(e) {
-                console.error(e);
-            }
-        }
-
-        this.reentry--;
-    }
-
-}
-
-export function useObservableTrigger<T>(obserable: Observable<T> | undefined | null) {
-    const [count, trigger] = useTrigger();
-    useEffect(() => {
-        if (!obserable) return;
-        const guard = obserable.connect(trigger);
-        return () => guard.dispose();
-    }, [obserable]);
-    return count;
 }
 
 export function useObservableReadonly<T>(obserable: Observable<T>) {
-    useObservableTrigger(obserable);
+    useMessageTrigger(obserable);
     return obserable.value;
 }
 
 export function useObservable<T>(obserable: Observable<T>) {
-    useObservableTrigger(obserable);
+    useMessageTrigger(obserable);
 
     const observableRef = useRef(obserable);
     observableRef.current = obserable;
@@ -87,4 +47,3 @@ export function useObservable<T>(obserable: Observable<T>) {
     const update = useCallback((v: T) => observableRef.current.value = v, []);
     return [obserable.value, update] as const;
 }
-

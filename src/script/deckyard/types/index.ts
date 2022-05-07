@@ -2,14 +2,14 @@ export * from "./card";
 export * from "./card_face";
 export * from "./card_type";
 export * from "./card_layout";
-export * from "./database";
+export * from "../database";
 export * from "./mana";
 
 import * as FlexSearch from "flexsearch";
 
 import { CardAtomicFile } from "mtgjson/files";
 import { Card, convertAtomicCard } from "./card";
-import { CardDatabase } from "./database";
+import { CardDatabase } from "../database";
 
 const DOCUMENT_OPTIONS = {
     charset: "latin:simple",

@@ -1,9 +1,9 @@
 import * as FlexSearch from "flexsearch";
 import { cooperativeIteratorToSet, iterUnion } from "util/iterator";
 
-import { Card, CardType, Layout } from ".";
-import { CardTypeSuper } from "./card_type_super";
-import { ColourIdentity } from "./colour_identity";
+import { Card, CardType, Layout } from "./types";
+import { CardTypeSuper } from "./types/card_type_super";
+import { ColourIdentity } from "./types/colour_identity";
 
 export class CardDatabase {
     

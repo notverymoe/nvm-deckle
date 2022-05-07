@@ -3,86 +3,34 @@ import "./ListCards.scss";
 
 import * as React from "react";
 
+import { CardSet, useCardQuantity } from "deckyard/card_set";
+
 import { useRangeVirtual, useTrigger } from "components/hooks";
-import { VList           } from "components/vlist";
+import { VList                       } from "components/vlist";
+import { Button, ButtonGroup         } from "components/button";
+
+import { joinClassNames } from "util/shared";
+
 import { Card            } from "../types";
 import { IconCardType    } from "./IconCardType";
 import { IconManaCostSet } from "./IconManaSymbol";
-import { joinClassNames  } from "util/shared";
 
 import MUIArrow  from "assets/icons/mui_play_arrow.svg";
 import MUIAdd    from "assets/icons/mui_add.svg";
 import MUIRemove from "assets/icons/mui_remove.svg";
-import { Button, ButtonGroup } from "components/button";
+import { useMessageTrigger } from "util/message";
 
 const selectionContext = React.createContext<{selected: number, setSelected: (idx: number, card: Card) => void} | null>(null);;
 
-export interface CardGroup<T> {
+export interface CardGroup {
     name: string,
-    contents: T[],
+    contents: Card[],
 }
 
-export interface CardListRaw {
-    hasMetadata?: false,
-    groups: CardGroup<Card>[],
-}
-
-export interface CardWithMetadata {
-    qty: number,
-    card: Card,
-}
-
-export interface CardListMetadata {
-    hasMetadata: true,
-    groups: CardGroup<CardWithMetadata>[];
-}
-
-export type CardList = CardListRaw | CardListMetadata;
-
-export function useCollapseTracker(cards: CardList, defaultState: boolean = false) {
-
-    const [collapseTrigger, fireCollapseTrigger] = useTrigger();
-    const [   resetTrigger, fireResetTrigger   ] = useTrigger();
-
-    const defaultChanged = React.useRef(0);
-    const defaultStateRef = React.useRef(defaultState);
-    defaultStateRef.current = defaultState;
-
-    const collapsed = React.useMemo<boolean[]>(() => {
-        defaultChanged.current += 1;   
-        return [];
-    }, [cards, resetTrigger, defaultState]);
-    const setCollapsed = React.useCallback((v: number, state: boolean) => { 
-        if ((collapsed[v] ?? defaultStateRef.current) != state) {
-            collapsed[v] = state; 
-            fireCollapseTrigger();
-        }
-    }, [collapsed]);
-    const getCollapsed = React.useCallback(
-        (v: number) => collapsed[v] ?? defaultStateRef.current, 
-        [collapsed]
-    );
-
-    return  [
-        collapseTrigger+resetTrigger+defaultChanged.current, 
-        getCollapsed, 
-        setCollapsed, 
-        fireResetTrigger
-    ] as const;
-}
-
-export function ListCard({selected, setSelected, cards, getCollapsed, setCollapsed, collapseTrigger, move, add}: {
-    cards: CardList,
-
+export function ListCard({selected, setSelected, set}: {
+    set:         CardSet,
     selected:    number,
-    setSelected: (v: number, c: Card | null) => void,
-
-    getCollapsed: (v: number) => boolean,
-    setCollapsed: (v: number, state: boolean) => void,
-    collapseTrigger: number,
-
-    move?: (card: Card, v: number) => void,
-    add?:  (card: Card, v: number) => void,
+    setSelected: (v: number, c: Card | null) => void
 }) {
     const [count,     setCount    ] = React.useState(0);
     const [offset,    setOffsetRaw] = React.useState(0);
@@ -91,12 +39,90 @@ export function ListCard({selected, setSelected, cards, getCollapsed, setCollaps
 
     const [hasFocus, setHasFocus] = React.useState(false);
 
-    const maxLength = (cards.groups as CardGroup<any>[]).reduce<number>((p, v, i) => {
-        return p + (getCollapsed(i) ? 1 : v.contents.length + 1);
-    }, 0);
+    const cardSetTrigger = useMessageTrigger(set.onModifySet);
+
+    const maxLength = !set.hasQuantities 
+        ? set.cards.length
+        : set.cards.reduce<number>((p, v) => p + set.getQuantity(v)!, 0);
 
     const cardsShown = useRangeVirtual(
-        (i, length) => {
+        (i, length) => set.cards.slice(i, Math.min(set.cards.length, i + length)).map((v, j) => <ListCardEntry
+            key={i + j}
+            set={set}
+            card={v}
+        />), 
+        offset, 
+        count, 
+        undefined, 
+        [set, cardSetTrigger]
+    );
+
+    return <selectionContext.Provider value={{selected, setSelected}}>
+        <VList 
+            lines={1} 
+            length={maxLength}
+            offset={offset}
+            setOffset={setOffset}
+            setCount={setCount}
+            setOffsetMax={setOffsetMax}
+            className="list-cards"
+            setHasFocus={setHasFocus}
+            hasFocus={hasFocus}
+            tabIndex={0}
+            selectable
+            selection={selected}
+            setSelection={v => setSelected(v, (cardsShown[v - offset]?.props as any)?.card)} // TODO HACK
+        >{cardsShown}</VList>
+    </selectionContext.Provider>;
+}
+
+export function ListCardEntry({set, card}: {
+    set: CardSet,
+    card: Card,
+}) {
+    const [toggleControls, setToggleControls] = React.useState(false);
+    const [controlRef, setControlRef] = React.useState<HTMLDivElement | null>(null);
+
+    const hasQuantities = set.hasQuantities();
+    const qty = useCardQuantity(set, card);
+
+    React.useEffect(() => {
+        if (!hasQuantities || !toggleControls || !controlRef) return;
+        const cb = (e: MouseEvent) => {
+            if (controlRef?.contains(e.target as Node) ?? true) return;
+            setToggleControls(false);
+        };
+        document.addEventListener("mousedown", cb);
+        return () => document.removeEventListener("mousedown", cb)
+    }, [hasQuantities, toggleControls, controlRef]);
+    
+    return <div className="card-entry" title={card.name}>
+        {hasQuantities && <div className="card-qty" title={`x${qty}`}>{qty}</div>}
+        <div className="card-type"><IconCardType card={card}/></div>
+        <div className="card-name">{card.name}</div>
+        {hasQuantities && <div className={joinClassNames("card-overlay", toggleControls && "hover")} ref={setControlRef}>
+            {hasQuantities && <ButtonGroup direction="horizontal">
+                <Button icon={MUIAdd}    action={() => set.addQuantity(card,  1)}/>
+                <Button icon={MUIRemove} action={() => set.addQuantity(card, -1)}/>
+            </ButtonGroup>}
+        </div>}
+        <div className="card-cost" onClick={() => setToggleControls(!toggleControls)}>
+            <IconManaCostSet costs={card.faces.map(v => v.manaCost)}/>
+        </div>
+    </div>
+}
+
+export function ListCardGroup({name, collapsed, toggle, count}: {name: string, collapsed: boolean, toggle: () => void, count: number}) {
+    return <div className={joinClassNames("card-group", collapsed && "collapsed")} onClick={toggle}>
+        <div className="name">{name}</div>
+        <div className="count">{count}</div>
+        <div className="arrow">{"▼"}</div>
+    </div>;
+}
+
+
+
+            /*
             if (cards.groups.length <= 0) {
                 return [];
             }
@@ -155,76 +181,4 @@ export function ListCard({selected, setSelected, cards, getCollapsed, setCollaps
                 }
                 skip = 0;
             }
-            return result;
-        }, 
-        offset, 
-        count, 
-        undefined, 
-        [collapseTrigger, cards]
-    );
-
-    return <selectionContext.Provider value={{selected, setSelected}}>
-        <VList 
-            lines={1} 
-            length={maxLength}
-            offset={offset}
-            setOffset={setOffset}
-            setCount={setCount}
-            setOffsetMax={setOffsetMax}
-            className="list-cards"
-            setHasFocus={setHasFocus}
-            hasFocus={hasFocus}
-            tabIndex={0}
-            selectable
-            selection={selected}
-            setSelection={v => setSelected(v, (cardsShown[v - offset]?.props as any)?.card)} // TODO HACK
-        >{cardsShown}</VList>
-    </selectionContext.Provider>;
-}
-
-export function ListCardEntry({qty, card, move, add}: {
-    qty?: number,
-    card: Card, 
-    move?: (v: number) => void,
-    add?:  (v: number) => void,
-}) {
-    const [toggleControls, setToggleControls] = React.useState(false);
-    const [controlRef, setControlRef] = React.useState<HTMLDivElement | null>(null);
-
-    React.useEffect(() => {
-        if (!(move || add) || !toggleControls || !controlRef) return;
-        const cb = (e: MouseEvent) => {
-            if (controlRef?.contains(e.target as Node) ?? true) return;
-            setToggleControls(false);
-        };
-        document.addEventListener("mousedown", cb);
-        return () => document.removeEventListener("mousedown", cb)
-    }, [move, add, toggleControls, controlRef]);
-    
-    return <div className="card-entry" title={card.name}>
-        {qty && <div className="card-qty" title={`x${qty}`}>{qty}</div>}
-        <div className="card-type"><IconCardType card={card}/></div>
-        <div className="card-name">{card.name}</div>
-        {(move || add) && <div className={joinClassNames("card-overlay", toggleControls && "hover")} ref={setControlRef}>
-            {add && <ButtonGroup direction="horizontal">
-                <Button icon={MUIAdd}    action={() => add( 1)}/>
-                <Button icon={MUIRemove} action={() => add(-1)}/>
-            </ButtonGroup>}
-            {move && <ButtonGroup direction="horizontal">
-                <Button icon={MUIArrow} iconRotate={3} action={() => move(-1)}/>
-                <Button icon={MUIArrow} iconRotate={1} action={() => move( 1)}/>
-            </ButtonGroup>}
-        </div>}
-        <div className="card-cost" onClick={() => setToggleControls(!toggleControls)}>
-            <IconManaCostSet costs={card.faces.map(v => v.manaCost)}/>
-        </div>
-    </div>
-}
-
-export function ListCardGroup({name, collapsed, toggle, count}: {name: string, collapsed: boolean, toggle: () => void, count: number}) {
-    return <div className={joinClassNames("card-group", collapsed && "collapsed")} onClick={toggle}>
-        <div className="name">{name}</div>
-        <div className="count">{count}</div>
-        <div className="arrow">{"▼"}</div>
-    </div>;
-}
+            return result;*/
